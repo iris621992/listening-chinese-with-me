@@ -3,7 +3,7 @@ title: 五月的一个安静早晨 (HSK1)
 slug: hsk1-quiet-may-morning
 hsk: HSK 1
 youtube: https://youtu.be/cHJLQGiN0QA
-summary: A gentle HSK 1 Chinese listening practice about a quiet May morning and simple everyday routines.
+summary: A gentle HSK 1 Chinese listening practice about a quiet May morning and simple daily routines.
 ---
 
 ## chinese
