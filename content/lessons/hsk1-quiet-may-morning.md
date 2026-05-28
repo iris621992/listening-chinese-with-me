@@ -3,7 +3,7 @@ title: 五月的一个安静早晨 (HSK1)
 slug: hsk1-quiet-may-morning
 hsk: HSK 1
 youtube: https://youtu.be/cHJLQGiN0QA
-summary: Bài nghe chậm về một buổi sáng tháng năm yên tĩnh, luyện nghe HSK1 với chủ đề sinh hoạt hằng ngày.
+summary: A gentle HSK 1 Chinese listening practice about a quiet May morning and simple everyday routines.
 ---
 
 ## chinese
@@ -115,13 +115,26 @@ Alright, that is all for today. Thank you for your time, see you tomorrow.
   Meaning: In the morning, I don't really want to start working right away.
 
 ## video_description
-- Bài nghe HSK1 chủ đề sinh hoạt buổi sáng và nhịp sống chậm trong tháng năm.
-- Phù hợp luyện nghe nối câu dài hơn: nghe ý chính trước, sau đó đối chiếu pinyin và từ vựng.
-- Gợi ý luyện tập: nghe 2 lần không nhìn chữ, lần 3 đọc theo để luyện ngữ điệu tự nhiên.
+EN:
+A gentle HSK 1 Chinese listening practice about a quiet May morning, slow daily routines, tea, a short walk in the park, and a peaceful mood.
+
+This lesson is suitable for beginner Chinese learners who want to practice listening with simple everyday vocabulary. Listen once without reading, then listen again with the Chinese text and pinyin.
+
+VI:
+Bài nghe HSK1 nhẹ nhàng về một buổi sáng tháng năm yên tĩnh, nhịp sinh hoạt chậm, uống trà, đi dạo công viên và cảm giác bình yên.
+
+Bài này phù hợp với người mới học tiếng Trung muốn luyện nghe bằng từ vựng đời sống đơn giản. Bạn có thể nghe lần đầu không nhìn chữ, sau đó nghe lại cùng chữ Hán và pinyin.
 
 ## pinned_comment
-- Bạn thích chi tiết nào nhất trong buổi sáng này: uống trà, đi công viên hay ngắm cây xanh? 🌿
-- Muốn mình làm thêm bản tốc độ chậm của chính bài này không? Comment “slow ver” nhé.
+EN:
+What is your favorite detail in this quiet morning: drinking tea, walking in the park, or looking at the green trees? 🌿
+
+Would you like a slower version of this listening practice? Comment “slow version” below.
+
+VI:
+Bạn thích chi tiết nào nhất trong buổi sáng yên tĩnh này: uống trà, đi công viên hay ngắm cây xanh? 🌿
+
+Bạn có muốn mình làm thêm bản đọc chậm hơn của bài này không? Hãy bình luận “slow version” nhé.
 
 ## thumbnail_idea
 Video đã có thumbnail hoàn chỉnh. Không cần tạo ảnh mới.
