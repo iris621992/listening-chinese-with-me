@@ -32,10 +32,24 @@ body {
   font-size: 1.1rem;
   color: #493b37;
 }
+.lesson-section {
+  overflow-x: hidden;
+}
 .lesson-section p,
 .lesson-section li {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.lesson-section[data-section="pinyin"],
+.lesson-section[data-section="video_description"],
+.lesson-section[data-section="pinned_comment"],
+.lesson-section[data-section="grammar_notes"] {
+  line-height: 1.72;
+}
+
+.lesson-section[data-section="pinyin"] p {
+  letter-spacing: .01em;
 }
 .meta { color: var(--muted); font-size: .95rem; }
 .missing { color: #9b5f5f; font-style: italic; }
@@ -62,5 +76,13 @@ p { margin: 0 0 .65rem; }
   }
   .lesson-header h1 { font-size: 1.25rem; margin-bottom: .5rem; }
   .lesson-section h2 { font-size: 1rem; }
+  .lesson-section p,
+  .lesson-section li { font-size: .96rem; }
+  .lesson-section[data-section="pinyin"],
+  .lesson-section[data-section="video_description"],
+  .lesson-section[data-section="pinned_comment"],
+  .lesson-section[data-section="grammar_notes"] {
+    line-height: 1.78;
+  }
   body { line-height: 1.58; }
 }
