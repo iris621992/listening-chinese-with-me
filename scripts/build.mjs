@@ -111,8 +111,12 @@ function validateLesson(meta, body, fileName) {
   }
 }
 
-function renderPage(title, content) {
-  return baseTemplate.replace('{{title}}', title).replace('{{content}}', content);
+function renderPage(title, content, { assetPath = './', homePath = './' } = {}) {
+  return baseTemplate
+    .replace('{{title}}', title)
+    .replace('{{assetPath}}', assetPath)
+    .replace('{{homePath}}', homePath)
+    .replace('{{content}}', content);
 }
 
 function copyAssets() {
@@ -138,7 +142,7 @@ function build() {
     ensure(pageDir);
 
     const top = `<article class="card lesson-header"><h1>${meta.title}</h1><p class="meta">${meta.hsk}</p><p>${meta.summary}</p><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Xem trên YouTube</a></p></article>`;
-    const html = renderPage(meta.title, top + toHtmlSections(body));
+    const html = renderPage(meta.title, top + toHtmlSections(body), { assetPath: '../../', homePath: '../../' });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
 
     lessons.push({ ...meta, url: `/lessons/${slug}/` });
@@ -148,7 +152,7 @@ function build() {
     .map((x) => `<article class="card"><h2><a href="${x.url}">${x.title}</a></h2><p class="meta">${x.hsk}</p><p>${x.summary}</p></article>`)
     .join('');
 
-  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Danh sách bài nghe</h2><p>Chọn bài để luyện nghe.</p></section>${list}`);
+  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Danh sách bài nghe</h2><p>Chọn bài để luyện nghe.</p></section>${list}`, { assetPath: './', homePath: './' });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
 

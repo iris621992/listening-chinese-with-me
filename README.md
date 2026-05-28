@@ -2,14 +2,39 @@
 
 Website này dùng **Markdown + script build đơn giản** (không framework phức tạp).
 
-## Chạy website
+## Chạy website trên máy của bạn
 
 ```bash
+npm install
 npm run build
 npm run serve
 ```
 
 Mở: `http://localhost:8080`
+
+## Tự động deploy lên GitHub Pages
+
+Dự án đã có sẵn workflow: `.github/workflows/deploy-pages.yml`.
+
+Workflow sẽ tự động:
+- chạy `npm install`
+- chạy `npm run build`
+- lấy thư mục `dist/` để deploy lên GitHub Pages
+
+Workflow chạy khi:
+- có commit mới vào nhánh `main`
+- hoặc bạn bấm chạy tay trong tab **Actions** (`workflow_dispatch`)
+
+### Cách bật GitHub Pages trong Settings (nếu repo chưa bật)
+
+1. Vào repo trên GitHub → **Settings**.
+2. Chọn mục **Pages** (menu bên trái).
+3. Ở phần **Build and deployment**:
+   - **Source**: chọn **GitHub Actions**.
+4. Vào tab **Actions**, chờ workflow `Deploy static site to GitHub Pages` chạy xong.
+5. Quay lại **Settings → Pages** để thấy link website public.
+
+> Mẹo: Nếu vừa bật Pages mà chưa có link, hãy chờ 1-3 phút rồi refresh lại trang Pages.
 
 ## Thêm bài học mới (siêu đơn giản)
 
@@ -64,7 +89,6 @@ summary: Bài nghe tự giới thiệu ngắn, dễ nghe cho người mới.
 
 > Lưu ý: Script build sẽ báo lỗi nếu thiếu bất kỳ phần nào ở trên.
 > Với `grammar_notes`, nên ưu tiên **EN trước, VI sau** để phù hợp người học quốc tế.
-
 
 ### 3) Build lại
 
