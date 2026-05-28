@@ -1,0 +1,11 @@
+{
+  "name": "listening-chinese-with-me",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simple static site for Listening Chinese With Me",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --watch",
+    "serve": "python3 -m http.server 8080 -d dist"
+  }
+}
