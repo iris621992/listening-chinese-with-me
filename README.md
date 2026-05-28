@@ -43,7 +43,11 @@ summary: Bài nghe tự giới thiệu ngắn, dễ nghe cho người mới.
 - từ/cụm từ: nghĩa
 
 ## grammar_notes
-- ghi chú ngữ pháp
+- Tên cấu trúc tiếng Trung
+- EN: giải thích ngắn gọn bằng tiếng Anh đơn giản (ưu tiên đặt trước)
+- VI: giải thích bằng tiếng Việt (đặt sau EN)
+- Example: ví dụ tiếng Trung trong bài
+- Meaning: nghĩa tiếng Anh ngắn gọn của ví dụ
 
 ## video_description
 - nội dung mô tả video YouTube
@@ -59,6 +63,8 @@ summary: Bài nghe tự giới thiệu ngắn, dễ nghe cho người mới.
 ```
 
 > Lưu ý: Script build sẽ báo lỗi nếu thiếu bất kỳ phần nào ở trên.
+> Với `grammar_notes`, nên ưu tiên **EN trước, VI sau** để phù hợp người học quốc tế.
+
 
 ### 3) Build lại
 

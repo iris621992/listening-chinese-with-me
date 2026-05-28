@@ -33,8 +33,17 @@ How about you?
 - 呢 (ne): trợ từ hỏi lại / question particle
 
 ## grammar_notes
-- Câu mẫu giới thiệu tên: **我叫 + tên**.
-- Dùng **你呢？** để hỏi lại người nghe.
+- **我叫 + 名字**  
+  EN: Basic pattern to introduce your name: “I am called… / My name is…”.  
+  VI: Mẫu câu cơ bản để giới thiệu tên: “Tôi tên là…”.  
+  Example: *我叫小明。*  
+  Meaning: My name is Xiao Ming.
+
+- **你呢？**  
+  EN: A short follow-up question meaning “And you?” or “How about you?”.  
+  VI: Câu hỏi ngắn để hỏi lại: “Còn bạn thì sao?”.  
+  Example: *你呢？*  
+  Meaning: How about you?
 
 ## video_description
 - Bài nghe HSK1 chủ đề chào hỏi cho người mới học tiếng Trung.

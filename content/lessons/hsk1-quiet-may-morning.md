@@ -84,11 +84,35 @@ Alright, that is all for today. Thank you for your time, see you tomorrow.
 - 舒服 (shūfu): dễ chịu / comfortable
 
 ## grammar_notes
-- **不是……的**: dùng để nhấn mạnh nguyên nhân/cách thức đã xảy ra. Ví dụ: *不是闹钟叫醒的*.
-- **先……然后……接着……**: chuỗi hành động theo thứ tự thời gian.
-- **有一点 + tính từ**: diễn tả mức độ nhẹ, ví dụ *有一点老*.
-- **V 一 V / 看看, 走一走, 想一想**: dạng lặp động từ, tạo sắc thái nhẹ nhàng, “làm một chút”.
-- **不太想 + động từ**: “không muốn lắm”, mức độ nhẹ hơn *不想*.
+- **不是……的**  
+  EN: Used to emphasize the reason or method of an action that already happened.  
+  VI: Dùng để nhấn mạnh nguyên nhân hoặc cách thức của một hành động đã xảy ra.  
+  Example: *不是闹钟叫醒的*  
+  Meaning: It wasn't the alarm clock that woke me up.
+
+- **先……然后……接着……**  
+  EN: Shows actions in time order: first…, then…, and then….  
+  VI: Dùng để nối các hành động theo thứ tự thời gian: trước…, rồi…, tiếp theo….  
+  Example: *我起身，先去喝一杯水，然后洗洗脸。*  
+  Meaning: I got up, first drank a glass of water, then washed my face.
+
+- **有一点 + adjective**  
+  EN: Means “a little bit…,” often for a mild degree.  
+  VI: Nghĩa là “hơi…, một chút…”, diễn tả mức độ nhẹ.  
+  Example: *有一点老*  
+  Meaning: A little old.
+
+- **V 一 V / 看看, 走一走, 想一想**  
+  EN: Verb reduplication makes the action sound short, light, or casual.  
+  VI: Dạng lặp động từ giúp hành động nghe nhẹ nhàng, ngắn gọn, mang sắc thái “làm một chút”.  
+  Example: *去公园走一走*  
+  Meaning: Go for a short walk in the park.
+
+- **不太想 + verb**  
+  EN: Means “not really want to…,” softer than **不想**.  
+  VI: Nghĩa là “không muốn lắm…”, nhẹ hơn **不想**.  
+  Example: *早上我不太想马上工作。*  
+  Meaning: In the morning, I don't really want to start working right away.
 
 ## video_description
 - Bài nghe HSK1 chủ đề sinh hoạt buổi sáng và nhịp sống chậm trong tháng năm.
