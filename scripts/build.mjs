@@ -6,6 +6,8 @@ const contentDir = path.join(root, 'content/lessons');
 const distDir = path.join(root, 'dist');
 const baseTemplate = fs.readFileSync(path.join(root, 'templates/base.html'), 'utf8');
 
+const SITE_BASE = '/listening-chinese-with-me';
+
 const REQUIRED_FRONTMATTER = ['title', 'slug', 'hsk', 'youtube', 'summary'];
 const REQUIRED_SECTIONS = [
   'chinese',
@@ -142,17 +144,17 @@ function build() {
     ensure(pageDir);
 
     const top = `<article class="card lesson-header"><h1>${meta.title}</h1><p class="meta">${meta.hsk}</p><p>${meta.summary}</p><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Xem trên YouTube</a></p></article>`;
-    const html = renderPage(meta.title, top + toHtmlSections(body), { assetPath: '../../', homePath: '../../' });
+    const html = renderPage(meta.title, top + toHtmlSections(body), { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
 
-    lessons.push({ ...meta, url: `/lessons/${slug}/` });
+    lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${slug}/` });
   }
 
   const list = lessons
     .map((x) => `<article class="card"><h2><a href="${x.url}">${x.title}</a></h2><p class="meta">${x.hsk}</p><p>${x.summary}</p></article>`)
     .join('');
 
-  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Danh sách bài nghe</h2><p>Chọn bài để luyện nghe.</p></section>${list}`, { assetPath: './', homePath: './' });
+  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Danh sách bài nghe</h2><p>Chọn bài để luyện nghe.</p></section>${list}`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
 
