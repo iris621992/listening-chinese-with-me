@@ -26,7 +26,19 @@ body {
   padding: 1rem;
   margin-bottom: 1rem;
 }
+.lesson-header h1 { margin-top: 0; }
+.lesson-section h2 {
+  margin: 0 0 .75rem;
+  font-size: 1.1rem;
+  color: #493b37;
+}
+.lesson-section p,
+.lesson-section li {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .meta { color: var(--muted); font-size: .95rem; }
+.missing { color: #9b5f5f; font-style: italic; }
 .btn {
   display: inline-block;
   padding: .55rem .85rem;
@@ -35,8 +47,20 @@ body {
   color: #fff;
   text-decoration: none;
 }
-ul { padding-left: 1.2rem; }
+ul { padding-left: 1.2rem; margin: 0; }
+p { margin: 0 0 .65rem; }
 .site-footer { color: var(--muted); font-size: .9rem; padding-bottom: 2rem; }
+
 @media (max-width: 640px) {
-  h1 { font-size: 1.25rem; }
+  .wrap { padding: .75rem; }
+  .site-header h1 { font-size: 1.1rem; }
+  .site-header p { font-size: .92rem; }
+  .card {
+    border-radius: 12px;
+    padding: .85rem;
+    margin-bottom: .75rem;
+  }
+  .lesson-header h1 { font-size: 1.25rem; margin-bottom: .5rem; }
+  .lesson-section h2 { font-size: 1rem; }
+  body { line-height: 1.58; }
 }
