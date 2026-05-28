@@ -17,16 +17,40 @@
         </span>
       </a>
       <nav class="header-controls" aria-label="Site controls">
-        <div class="menu-group">
-          <span class="menu-label" data-i18n="channels_label">Channels / Learning language</span>
-          <div class="menu-items channel-menu">
-            <a class="menu-item active" href="{{homePath}}">Chinese Listening With Me</a>
-            <span class="menu-item disabled" aria-disabled="true">Vietnamese Listening With Me (Coming soon)</span>
-            <span class="menu-item disabled" aria-disabled="true">Korean Listening With Me (Coming soon)</span>
-          </div>
+        <div class="menu-group channels-group">
+          <span class="menu-label" data-i18n="channels_label">Channels (learning language)</span>
+          <details class="channels-dropdown">
+            <summary class="channels-trigger">
+              <span>Channels</span>
+              <span class="channels-arrow" aria-hidden="true">▾</span>
+            </summary>
+            <div class="channels-menu" role="menu" aria-label="Learning channels">
+              <a class="channel-option active" href="{{homePath}}" role="menuitem">
+                <span class="channel-icon" aria-hidden="true">中</span>
+                <span class="channel-meta">
+                  <span class="channel-title">Chinese Listening With Me</span>
+                  <span class="channel-description">Gentle Chinese listening practice for HSK learners.</span>
+                </span>
+              </a>
+              <span class="channel-option disabled" aria-disabled="true">
+                <span class="channel-icon" aria-hidden="true">🇻🇳</span>
+                <span class="channel-meta">
+                  <span class="channel-title">Vietnamese Listening With Me <span class="soon-badge">Coming soon</span></span>
+                  <span class="channel-description">Slow Vietnamese listening practice.</span>
+                </span>
+              </span>
+              <span class="channel-option disabled" aria-disabled="true">
+                <span class="channel-icon" aria-hidden="true">🇰🇷</span>
+                <span class="channel-meta">
+                  <span class="channel-title">Korean Listening With Me <span class="soon-badge">Coming soon</span></span>
+                  <span class="channel-description">Gentle Korean listening practice.</span>
+                </span>
+              </span>
+            </div>
+          </details>
         </div>
         <div class="menu-group">
-          <label class="menu-label" for="interface-language" data-i18n="interface_language_label">Interface language</label>
+          <label class="menu-label" for="interface-language" data-i18n="interface_language_label">Interface Language (website UI)</label>
           <select id="interface-language" class="lang-select">
             <option value="en">English</option>
             <option value="vi">Tiếng Việt</option>
