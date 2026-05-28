@@ -8,7 +8,7 @@ const baseTemplate = fs.readFileSync(path.join(root, 'templates/base.html'), 'ut
 
 const SITE_BASE = '/listening-chinese-with-me';
 
-const REQUIRED_FRONTMATTER = ['title', 'slug', 'hsk', 'youtube', 'summary'];
+const REQUIRED_FRONTMATTER = ['title', 'slug', 'hsk', 'summary'];
 const REQUIRED_SECTIONS = ['chinese', 'pinyin', 'vietnamese', 'english', 'vocabulary', 'grammar_notes', 'video_description', 'pinned_comment', 'thumbnail_idea', 'image_timeline'];
 const STUDY_SECTIONS = ['chinese', 'pinyin', 'vocabulary', 'grammar_notes'];
 
@@ -111,6 +111,31 @@ const clean = (p) => fs.rmSync(p, { recursive: true, force: true });
 
 function parseFrontmatter(raw) { const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/); if (!m) throw new Error('Markdown thiếu frontmatter.'); const meta = {}; for (const line of m[1].split('\n')) { const i = line.indexOf(':'); if (i > -1) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim(); } return { meta, body: m[2] }; }
 function parseSections(md) { const sections = {}; const chunks = md.split('\n## '); for (let i = 1; i < chunks.length; i += 1) { const [heading, ...rest] = chunks[i].split('\n'); sections[heading.trim().toLowerCase()] = rest.join('\n').trim(); } return sections; }
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === 'youtu.be') {
+      const id = parsed.pathname.replace(/^\//, '').split('/')[0];
+      return id || null;
+    }
+    if (parsed.hostname === 'www.youtube.com' || parsed.hostname === 'youtube.com') {
+      if (parsed.pathname === '/watch') {
+        return parsed.searchParams.get('v');
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
+function toYouTubeEmbedUrl(url) {
+  const id = extractYouTubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
 function renderSectionBody(raw) { const lines = raw.split('\n'); let html = ''; let inList = false; for (const line of lines) { if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${line.slice(2)}</li>`; continue; } if (line.trim() === '') { if (inList) { html += '</ul>'; inList = false; } continue; } if (inList) { html += '</ul>'; inList = false; } html += `<p>${line}</p>`; } if (inList) html += '</ul>'; return html; }
 
 function toHtmlSections(md) {
@@ -135,7 +160,14 @@ function build() {
   for (const file of files) {
     const { meta, body } = parseFrontmatter(fs.readFileSync(path.join(contentDir, file), 'utf8')); validateLesson(meta, body, file);
     const sections = parseSections(body); const pageDir = path.join(distDir, 'lessons', meta.slug); ensure(pageDir);
-    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer" data-i18n="watch_youtube">Watch on YouTube</a></p></article><section class="study-intro card"><h2 data-i18n="study_area">Study Area</h2></section>`;
+    const youtubeEmbed = toYouTubeEmbedUrl(meta.youtube);
+    const youtubeWatchButton = meta.youtube
+      ? `<p class="lesson-video-actions"><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer" data-i18n="watch_youtube">Watch on YouTube</a></p>`
+      : '';
+    const youtubeBlock = youtubeEmbed
+      ? `<section class="lesson-video" aria-label="Lesson video"><div class="lesson-video-frame"><iframe src="${youtubeEmbed}" title="${meta.title} - YouTube video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>${youtubeWatchButton}</section>`
+      : '';
+    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div>${youtubeBlock}<section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section></article><section class="study-intro card"><h2 data-i18n="study_area">Study Area</h2></section>`;
     fs.writeFileSync(path.join(pageDir, 'index.html'), renderPage(meta.title, top + toHtmlSections(body) + baseScript(true), { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` }), 'utf8');
     lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${meta.slug}/` });
   }

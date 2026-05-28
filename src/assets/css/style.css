@@ -59,6 +59,12 @@ h1,h2,h3{margin:.2rem 0 .6rem;line-height:1.3}.hero-title{font-size:clamp(1.8rem
 .lesson-card .meta-row{font-size:.9rem;color:#836f62;margin-bottom:.7rem}
 .lesson-hero{background:linear-gradient(130deg,#fffdfa,#fdf3ea)}
 .lesson-summary{color:var(--muted)} .lesson-overview{margin:.8rem 0 1rem;padding:.9rem;border:1px solid var(--line);border-radius:14px;background:#fff8f1}
+.lesson-video{margin:.9rem 0 1rem}
+.lesson-video-frame{position:relative;width:100%;padding-top:56.25%;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000}
+.lesson-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.lesson-video-actions{margin:.7rem 0 0}
+@media (max-width:580px){.lesson-video{margin:.8rem 0 .9rem}.lesson-video-actions .btn{width:100%;text-align:center}}
+
 .study-intro{background:#f5fbf6}.lesson-section p,.lesson-section li{overflow-wrap:anywhere}
 ul{padding-left:1.2rem;margin:0}.translation-switch{display:flex;gap:.7rem;flex-wrap:wrap}
 .translation-switch label{background:#fff7f2;border:1px solid var(--line);border-radius:999px;padding:.5rem .75rem}
