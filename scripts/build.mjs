@@ -96,7 +96,7 @@ function toHtmlSections(md) {
 
   return REQUIRED_SECTIONS.map((key) => {
     const content = sections[key] || '<p class="missing">(Chưa có nội dung)</p>';
-    return `<section class="card lesson-section"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
+    return `<section class="card lesson-section" data-section="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
   }).join('');
 }
 
