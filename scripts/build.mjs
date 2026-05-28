@@ -189,7 +189,24 @@ function validateLesson(meta, body, fileName) {
 }
 
 function renderPage(title, content, { assetPath = './', homePath = './' } = {}) {
-  return baseTemplate.replace('{{title}}', title).replace('{{assetPath}}', assetPath).replace('{{homePath}}', homePath).replace('{{content}}', content);
+  const replacements = {
+    title,
+    assetPath,
+    homePath,
+    content
+  };
+
+  const html = baseTemplate.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    if (Object.prototype.hasOwnProperty.call(replacements, key)) return replacements[key];
+    return match;
+  });
+
+  const unresolved = html.match(/\{\{\w+\}\}/g);
+  if (unresolved) {
+    throw new Error(`Template placeholders chưa được render: ${[...new Set(unresolved)].join(', ')}`);
+  }
+
+  return html;
 }
 
 function copyAssets() {
