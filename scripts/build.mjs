@@ -28,6 +28,7 @@ const UI_TEXT = {
     levels: 'Levels',
     topics: 'Topics',
     latest_lessons: 'Latest Lessons',
+    start_listening: 'Start Listening',
     open_lesson: 'Open Lesson',
     watch_youtube: 'Watch on YouTube',
     about_lesson: 'About this lesson',
@@ -49,6 +50,7 @@ const UI_TEXT = {
     levels: 'Trình độ',
     topics: 'Chủ đề',
     latest_lessons: 'Bài học mới nhất',
+    start_listening: 'Bắt đầu nghe',
     open_lesson: 'Mở bài học',
     watch_youtube: 'Xem trên YouTube',
     about_lesson: 'Giới thiệu bài học',
@@ -183,11 +185,12 @@ function build() {
   }
 
   const list = lessons
-    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2>${x.title}</h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}" data-i18n="open_lesson">Open Lesson</a></article>`)
+    .slice(0, 1)
+    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2>${x.title}</h2><p class="summary">${x.summary}</p><p class="meta-row">Transcript · Pinyin · Translation · Vocabulary</p><a class="btn btn-secondary" href="${x.url}" data-i18n="open_lesson">Open Lesson</a></article>`)
     .join('');
 
   const firstLessonUrl = lessons[0] ? lessons[0].url : '#';
-  const homeContent = `<section class="home-hero card"><p class="hero-kicker">Soft postcard style</p><h1>Listening Chinese With Me</h1><p class="hero-subtitle">Gentle Chinese listening practice for HSK learners.</p><p class="hero-description">Slow, natural Chinese stories with transcript, pinyin, translation, vocabulary, and study notes.</p><a class="btn" href="${firstLessonUrl}" data-i18n="home">Home</a></section><section class="latest-lessons"><h2 data-i18n="latest_lessons">Latest Lessons</h2><div class="lesson-grid">${list}</div></section><script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});langSelect.value=selected;}langSelect.value=savedLang;langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);});applyLang(savedLang);})();</script>`;
+  const homeContent = `<section class="home-hero card"><div><p class="badge">Video-based listening practice</p><h1 class="hero-title">Learn Chinese through gentle listening stories</h1><p class="hero-description">Slow, natural Chinese stories with transcript, pinyin, translation, vocabulary, and study notes.</p><div class="hero-actions"><a class="btn" href="${firstLessonUrl}" data-i18n="start_listening">Start Listening</a><a class="btn-text" href="#latest-lessons">View latest lesson</a></div><p class="purpose-text">This website helps YouTube viewers review each listening lesson with transcript, pinyin, translation, vocabulary, and grammar notes.</p></div><div class="hero-visual"><span class="blob a"></span><span class="blob b"></span><div class="study-card"><h3>你好</h3><p class="pinyin">nǐ hǎo</p><p>Translation: Hello</p><p class="vocab-chip">Vocabulary card: 你好 = hello</p><p class="hsk-chip">HSK 1</p></div></div></section><section id="latest-lessons" class="latest-lessons card"><h2 data-i18n="latest_lessons">Latest Lessons</h2><p class="section-subtitle">Choose a lesson, review the text, then continue listening on YouTube.</p><div class="lesson-grid">${list}</div></section><script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';const channelDetails=document.querySelector('.channels-dropdown');function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});langSelect.value=selected;}langSelect.value=savedLang;langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);});if(channelDetails){channelDetails.querySelector('summary').addEventListener('click',(e)=>{if(window.matchMedia('(max-width: 820px)').matches){e.preventDefault();channelDetails.open=!channelDetails.open;}});}applyLang(savedLang);})();</script>`;
   const home = renderPage('Listening Chinese With Me', homeContent, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
