@@ -22,11 +22,9 @@ const REQUIRED_SECTIONS = [
   'image_timeline'
 ];
 
-const PUBLIC_SECTIONS = [
+const STUDY_SECTIONS = [
   'chinese',
   'pinyin',
-  'vietnamese',
-  'english',
   'vocabulary',
   'grammar_notes'
 ];
@@ -105,10 +103,19 @@ function renderSectionBody(raw) {
 function toHtmlSections(md) {
   const sections = parseSections(md);
 
-  return PUBLIC_SECTIONS.map((key) => {
+  const fixedSections = STUDY_SECTIONS.map((key) => {
     const content = sections[key] || '<p class="missing">(Content missing)</p>';
     return `<section class="card lesson-section" data-section="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
   }).join('');
+
+  const translationSelector = `<section class="card lesson-section translation-controls"><h2>Display Translation</h2><div class="translation-switch" role="radiogroup" aria-label="Display translation language"><label><input type="radio" name="translation" value="english" checked> English</label><label><input type="radio" name="translation" value="vietnamese"> Vietnamese</label><label><input type="radio" name="translation" value="none"> No Translation</label></div></section>`;
+
+  const translationSections = ['english', 'vietnamese'].map((key) => {
+    const content = sections[key] || '<p class="missing">(Content missing)</p>';
+    return `<section class="card lesson-section translation-section" data-translation="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
+  }).join('');
+
+  return `${translationSelector}${fixedSections}${translationSections}`;
 }
 
 function validateLesson(meta, body, fileName) {
@@ -153,18 +160,19 @@ function build() {
     const pageDir = path.join(distDir, 'lessons', slug);
     ensure(pageDir);
 
-    const top = `<article class="card lesson-header"><h1>${meta.title}</h1><p class="meta">${meta.hsk}</p><p>${meta.summary}</p><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article>`;
-    const html = renderPage(meta.title, top + toHtmlSections(body), { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
+    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article><section class="study-intro"><h2>Study Area</h2><p>Read, listen, compare pronunciation, and review notes at your own pace.</p></section>`;
+    const script = `<script>(function(){const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden = section.dataset.translation !== mode || mode === 'none';});}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));renderTranslation('english');})();</script>`;
+    const html = renderPage(meta.title, top + toHtmlSections(body) + script, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
 
     lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${slug}/` });
   }
 
   const list = lessons
-    .map((x) => `<article class="card"><h2><a href="${x.url}">${x.title}</a></h2><p class="meta">${x.hsk}</p><p>${x.summary}</p></article>`)
+    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2><a href="${x.url}">${x.title}</a></h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}">Open Lesson</a></article>`)
     .join('');
 
-  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Listening Lessons</h2><p>Choose a lesson to practice listening.</p></section>${list}`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
+  const home = renderPage('Listening Chinese With Me', `<section class="library-hero card"><h2>Listening Library</h2><p>Modern listening lessons you can reuse for Chinese, Vietnamese, Korean, and more.</p></section><section class="lesson-grid">${list}</section>`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
 
