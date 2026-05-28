@@ -18,7 +18,26 @@
       </a>
       <nav class="header-controls" aria-label="Primary navigation">
         <a class="nav-tab is-active" href="{{homePath}}" data-i18n="home">Home</a>
-        <a class="nav-tab" href="{{homePath}}#languages" data-i18n="languages">Languages</a>
+        <div class="nav-dropdown">
+          <a class="nav-tab nav-dropdown-trigger" href="{{homePath}}#languages" data-i18n="languages">Languages</a>
+          <div class="nav-dropdown-menu" aria-label="Language channels">
+            <a class="nav-dropdown-item active" href="{{homePath}}/chinese/">
+              <span>Chinese Listening With Me</span>
+            </a>
+            <span class="nav-dropdown-item disabled">
+              <span>Vietnamese Listening With Me</span>
+              <span class="soon-badge">Soon</span>
+            </span>
+            <span class="nav-dropdown-item disabled">
+              <span>Korean Listening With Me</span>
+              <span class="soon-badge">Soon</span>
+            </span>
+            <span class="nav-dropdown-item disabled">
+              <span>Japanese Listening With Me</span>
+              <span class="soon-badge">Soon</span>
+            </span>
+          </div>
+        </div>
         <a class="nav-tab" href="{{homePath}}#how-it-works" data-i18n="how_it_works">How it works</a>
         <a class="nav-tab" href="{{homePath}}/chinese/#latest-lessons" data-i18n="latest_lessons">Latest Lessons</a>
       </nav>
