@@ -9,25 +9,8 @@ const baseTemplate = fs.readFileSync(path.join(root, 'templates/base.html'), 'ut
 const SITE_BASE = '/listening-chinese-with-me';
 
 const REQUIRED_FRONTMATTER = ['title', 'slug', 'hsk', 'youtube', 'summary'];
-const REQUIRED_SECTIONS = [
-  'chinese',
-  'pinyin',
-  'vietnamese',
-  'english',
-  'vocabulary',
-  'grammar_notes',
-  'video_description',
-  'pinned_comment',
-  'thumbnail_idea',
-  'image_timeline'
-];
-
-const STUDY_SECTIONS = [
-  'chinese',
-  'pinyin',
-  'vocabulary',
-  'grammar_notes'
-];
+const REQUIRED_SECTIONS = ['chinese', 'pinyin', 'vietnamese', 'english', 'vocabulary', 'grammar_notes', 'video_description', 'pinned_comment', 'thumbnail_idea', 'image_timeline'];
+const STUDY_SECTIONS = ['chinese', 'pinyin', 'vocabulary', 'grammar_notes'];
 
 const SECTION_LABELS = {
   chinese: 'Chinese',
@@ -36,10 +19,7 @@ const SECTION_LABELS = {
   english: 'English',
   vocabulary: 'Vocabulary',
   grammar_notes: 'Grammar Notes',
-  video_description: 'About this lesson',
-  pinned_comment: 'Pinned Comment',
-  thumbnail_idea: 'Thumbnail Idea',
-  image_timeline: 'Image Timeline'
+  video_description: 'About this lesson'
 };
 
 const ensure = (p) => fs.mkdirSync(p, { recursive: true });
@@ -119,22 +99,13 @@ function toHtmlSections(md) {
 }
 
 function validateLesson(meta, body, fileName) {
-  for (const key of REQUIRED_FRONTMATTER) {
-    if (!meta[key]) throw new Error(`${fileName}: thiếu frontmatter "${key}".`);
-  }
-
+  for (const key of REQUIRED_FRONTMATTER) if (!meta[key]) throw new Error(`${fileName}: thiếu frontmatter "${key}".`);
   const sections = parseSections(body);
-  for (const key of REQUIRED_SECTIONS) {
-    if (!sections[key]) throw new Error(`${fileName}: thiếu section "## ${key}".`);
-  }
+  for (const key of REQUIRED_SECTIONS) if (!sections[key]) throw new Error(`${fileName}: thiếu section "## ${key}".`);
 }
 
 function renderPage(title, content, { assetPath = './', homePath = './' } = {}) {
-  return baseTemplate
-    .replace('{{title}}', title)
-    .replace('{{assetPath}}', assetPath)
-    .replace('{{homePath}}', homePath)
-    .replace('{{content}}', content);
+  return baseTemplate.replace('{{title}}', title).replace('{{assetPath}}', assetPath).replace('{{homePath}}', homePath).replace('{{content}}', content);
 }
 
 function copyAssets() {
@@ -156,36 +127,25 @@ function build() {
     validateLesson(meta, body, file);
 
     const sections = parseSections(body);
-    const slug = meta.slug;
-    const pageDir = path.join(distDir, 'lessons', slug);
+    const pageDir = path.join(distDir, 'lessons', meta.slug);
     ensure(pageDir);
 
-    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article><section class="study-intro"><h2>Study Area</h2><p>Read, listen, compare pronunciation, and review notes at your own pace.</p></section>`;
+    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article><section class="study-intro card"><h2>Study Area</h2><p>Read, listen, compare pronunciation, and review notes at your own pace.</p></section>`;
     const script = `<script>(function(){const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden = section.dataset.translation !== mode || mode === 'none';});}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));renderTranslation('english');})();</script>`;
+
     const html = renderPage(meta.title, top + toHtmlSections(body) + script, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
-
-    lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${slug}/` });
+    lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${meta.slug}/` });
   }
 
   const list = lessons
-    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2><a href="${x.url}">${x.title}</a></h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}">Open Lesson</a></article>`)
+    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2>${x.title}</h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}">Open Lesson</a></article>`)
     .join('');
 
-  const home = renderPage('Listening Chinese With Me', `<section class="library-hero card"><h2>Listening Library</h2><p>Modern listening lessons you can reuse for Chinese, Vietnamese, Korean, and more.</p></section><section class="lesson-grid">${list}</section>`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
+  const firstLessonUrl = lessons[0] ? lessons[0].url : '#';
+  const homeContent = `<section class="home-hero card"><p class="hero-kicker">Soft postcard style</p><h1>Listening Chinese With Me</h1><p class="hero-subtitle">Gentle Chinese listening practice for HSK learners.</p><p class="hero-description">Slow, natural Chinese stories with transcript, pinyin, translation, vocabulary, and study notes.</p><a class="btn" href="${firstLessonUrl}">Start Listening</a></section><section class="latest-lessons"><h2>Latest Lessons</h2><div class="lesson-grid">${list}</div></section>`;
+  const home = renderPage('Listening Chinese With Me', homeContent, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
 
 build();
-
-if (process.argv.includes('--watch')) {
-  console.log('Watching...');
-  fs.watch(path.join(root, 'content'), { recursive: true }, () => {
-    try {
-      build();
-      console.log('Rebuilt');
-    } catch (e) {
-      console.error(e.message);
-    }
-  });
-}
