@@ -13,9 +13,26 @@
         <span class="brand-mark">听</span>
         <span>
           <strong>Listening Chinese With Me</strong>
-          <small>Gentle stories for steady progress</small>
+          <small data-i18n="brand_tagline">Gentle stories for steady progress</small>
         </span>
       </a>
+      <nav class="header-controls" aria-label="Site controls">
+        <div class="menu-group">
+          <span class="menu-label" data-i18n="channels_label">Channels / Learning language</span>
+          <div class="menu-items channel-menu">
+            <a class="menu-item active" href="{{homePath}}">Chinese Listening With Me</a>
+            <span class="menu-item disabled" aria-disabled="true">Vietnamese Listening With Me (Coming soon)</span>
+            <span class="menu-item disabled" aria-disabled="true">Korean Listening With Me (Coming soon)</span>
+          </div>
+        </div>
+        <div class="menu-group">
+          <label class="menu-label" for="interface-language" data-i18n="interface_language_label">Interface language</label>
+          <select id="interface-language" class="lang-select">
+            <option value="en">English</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+      </nav>
     </div>
   </header>
   <main class="wrap">{{content}}</main>

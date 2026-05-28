@@ -21,6 +21,50 @@ const SECTION_LABELS = {
   grammar_notes: 'Grammar Notes',
   video_description: 'About this lesson'
 };
+const UI_TEXT = {
+  en: {
+    home: 'Home',
+    channels: 'Channels',
+    levels: 'Levels',
+    topics: 'Topics',
+    latest_lessons: 'Latest Lessons',
+    open_lesson: 'Open Lesson',
+    watch_youtube: 'Watch on YouTube',
+    about_lesson: 'About this lesson',
+    study_area: 'Study Area',
+    chinese: 'Chinese',
+    pinyin: 'Pinyin',
+    translation: 'Translation',
+    vocabulary: 'Vocabulary',
+    grammar_notes: 'Grammar Notes',
+    display_translation: 'Display Translation',
+    no_translation: 'No Translation',
+    brand_tagline: 'Gentle stories for steady progress',
+    channels_label: 'Channels / Learning language',
+    interface_language_label: 'Interface language'
+  },
+  vi: {
+    home: 'Trang chủ',
+    channels: 'Kênh học',
+    levels: 'Trình độ',
+    topics: 'Chủ đề',
+    latest_lessons: 'Bài học mới nhất',
+    open_lesson: 'Mở bài học',
+    watch_youtube: 'Xem trên YouTube',
+    about_lesson: 'Giới thiệu bài học',
+    study_area: 'Khu vực học',
+    chinese: 'Tiếng Trung',
+    pinyin: 'Pinyin',
+    translation: 'Bản dịch',
+    vocabulary: 'Từ vựng',
+    grammar_notes: 'Ghi chú ngữ pháp',
+    display_translation: 'Hiển thị bản dịch',
+    no_translation: 'Không hiển thị bản dịch',
+    brand_tagline: 'Những câu chuyện nhẹ nhàng để tiến bộ đều đặn',
+    channels_label: 'Kênh học / Ngôn ngữ học',
+    interface_language_label: 'Ngôn ngữ giao diện'
+  }
+};
 
 const ensure = (p) => fs.mkdirSync(p, { recursive: true });
 const clean = (p) => fs.rmSync(p, { recursive: true, force: true });
@@ -85,14 +129,14 @@ function toHtmlSections(md) {
 
   const fixedSections = STUDY_SECTIONS.map((key) => {
     const content = sections[key] || '<p class="missing">(Content missing)</p>';
-    return `<section class="card lesson-section" data-section="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
+    return `<section class="card lesson-section" data-section="${key}"><h2 data-i18n="${key}">${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
   }).join('');
 
-  const translationSelector = `<section class="card lesson-section translation-controls"><h2>Display Translation</h2><div class="translation-switch" role="radiogroup" aria-label="Display translation language"><label><input type="radio" name="translation" value="english" checked> English</label><label><input type="radio" name="translation" value="vietnamese"> Vietnamese</label><label><input type="radio" name="translation" value="none"> No Translation</label></div></section>`;
+  const translationSelector = `<section class="card lesson-section translation-controls"><h2 data-i18n="display_translation">Display Translation</h2><div class="translation-switch" role="radiogroup" aria-label="Display translation language"><label><input type="radio" name="translation" value="english"> English</label><label><input type="radio" name="translation" value="vietnamese"> Vietnamese</label><label><input type="radio" name="translation" value="none" data-i18n-radio-none="true"> No Translation</label></div></section>`;
 
   const translationSections = ['english', 'vietnamese'].map((key) => {
     const content = sections[key] || '<p class="missing">(Content missing)</p>';
-    return `<section class="card lesson-section translation-section" data-translation="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
+    return `<section class="card lesson-section translation-section" data-translation="${key}"><h2 data-i18n="translation">${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
   }).join('');
 
   return `${translationSelector}${fixedSections}${translationSections}`;
@@ -130,8 +174,8 @@ function build() {
     const pageDir = path.join(distDir, 'lessons', meta.slug);
     ensure(pageDir);
 
-    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article><section class="study-intro card"><h2>Study Area</h2><p>Read, listen, compare pronunciation, and review notes at your own pace.</p></section>`;
-    const script = `<script>(function(){const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden = section.dataset.translation !== mode || mode === 'none';});}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));renderTranslation('english');})();</script>`;
+    const top = `<article class="lesson-hero card"><div><p class="badge">${meta.hsk}</p><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer" data-i18n="watch_youtube">Watch on YouTube</a></p></article><section class="study-intro card"><h2 data-i18n="study_area">Study Area</h2><p>Read, listen, compare pronunciation, and review notes at your own pace.</p></section>`;
+    const script = `<script>(function(){const ui=${JSON.stringify(UI_TEXT)};const isLesson=Boolean(document.querySelector('.translation-controls'));const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});const noneLabel=document.querySelector('[data-i18n-radio-none]');if(noneLabel)noneLabel.parentElement.lastChild.textContent=' '+ui[selected].no_translation;langSelect.value=selected;}if(langSelect){langSelect.value=savedLang;langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);if(isLesson&&!localStorage.getItem('lessonTranslation')){setDefaultTranslation(e.target.value);}});}const radios=document.querySelectorAll('input[name=\"translation\"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden=section.dataset.translation!==mode||mode==='none';});radios.forEach((r)=>{r.checked=r.value===mode;});if(isLesson)localStorage.setItem('lessonTranslation',mode);}function setDefaultTranslation(lang){const mode=lang==='vi'?'vietnamese':'english';renderTranslation(mode);}if(isLesson){const savedTranslation=localStorage.getItem('lessonTranslation');if(savedTranslation){renderTranslation(savedTranslation);}else{setDefaultTranslation(savedLang);}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));}applyLang(savedLang);})();</script>`;
 
     const html = renderPage(meta.title, top + toHtmlSections(body) + script, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
@@ -139,11 +183,11 @@ function build() {
   }
 
   const list = lessons
-    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2>${x.title}</h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}">Open Lesson</a></article>`)
+    .map((x) => `<article class="card lesson-card"><p class="badge">${x.hsk}</p><h2>${x.title}</h2><p class="summary">${x.summary}</p><a class="btn btn-secondary" href="${x.url}" data-i18n="open_lesson">Open Lesson</a></article>`)
     .join('');
 
   const firstLessonUrl = lessons[0] ? lessons[0].url : '#';
-  const homeContent = `<section class="home-hero card"><p class="hero-kicker">Soft postcard style</p><h1>Listening Chinese With Me</h1><p class="hero-subtitle">Gentle Chinese listening practice for HSK learners.</p><p class="hero-description">Slow, natural Chinese stories with transcript, pinyin, translation, vocabulary, and study notes.</p><a class="btn" href="${firstLessonUrl}">Start Listening</a></section><section class="latest-lessons"><h2>Latest Lessons</h2><div class="lesson-grid">${list}</div></section>`;
+  const homeContent = `<section class="home-hero card"><p class="hero-kicker">Soft postcard style</p><h1>Listening Chinese With Me</h1><p class="hero-subtitle">Gentle Chinese listening practice for HSK learners.</p><p class="hero-description">Slow, natural Chinese stories with transcript, pinyin, translation, vocabulary, and study notes.</p><a class="btn" href="${firstLessonUrl}" data-i18n="home">Home</a></section><section class="latest-lessons"><h2 data-i18n="latest_lessons">Latest Lessons</h2><div class="lesson-grid">${list}</div></section><script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});langSelect.value=selected;}langSelect.value=savedLang;langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);});applyLang(savedLang);})();</script>`;
   const home = renderPage('Listening Chinese With Me', homeContent, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
