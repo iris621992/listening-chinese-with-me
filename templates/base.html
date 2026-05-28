@@ -9,60 +9,30 @@
 <body>
   <header class="site-header">
     <div class="wrap header-inner">
-      <a class="brand" href="{{homePath}}" aria-label="Listening Chinese With Me Home">
+      <a class="brand" href="{{homePath}}" aria-label="Listening With Me Home">
         <span class="brand-mark">听</span>
         <span>
-          <strong>Listening Chinese With Me</strong>
+          <strong>Listening With Me</strong>
           <small data-i18n="brand_tagline">Gentle stories for steady progress</small>
         </span>
       </a>
       <nav class="header-controls" aria-label="Primary navigation">
         <a class="nav-tab is-active" href="{{homePath}}" data-i18n="home">Home</a>
-        <details class="nav-tab channels-dropdown">
-          <summary class="channels-trigger">
-            <span data-i18n="channels">Channels</span>
-            <span class="channels-arrow" aria-hidden="true">▾</span>
-          </summary>
-          <div class="channels-menu" role="menu" aria-label="Learning channels">
-              <a class="channel-option active" href="{{homePath}}" role="menuitem">
-                <span class="channel-icon" aria-hidden="true">中</span>
-                <span class="channel-meta">
-                  <span class="channel-title">Chinese Listening With Me</span>
-                  <span class="channel-description">Gentle Chinese listening practice for HSK learners.</span>
-                </span>
-              </a>
-              <span class="channel-option disabled" aria-disabled="true">
-                <span class="channel-icon" aria-hidden="true">🇻🇳</span>
-                <span class="channel-meta">
-                  <span class="channel-title">Vietnamese Listening With Me <span class="soon-badge">Coming soon</span></span>
-                  <span class="channel-description">Slow Vietnamese listening practice.</span>
-                </span>
-              </span>
-              <span class="channel-option disabled" aria-disabled="true">
-                <span class="channel-icon" aria-hidden="true">🇰🇷</span>
-                <span class="channel-meta">
-                  <span class="channel-title">Korean Listening With Me <span class="soon-badge">Coming soon</span></span>
-                  <span class="channel-description">Gentle Korean listening practice.</span>
-                </span>
-              </span>
-          </div>
-        </details>
-        <a class="nav-tab" href="#latest-lessons" data-i18n="levels">Levels</a>
-        <a class="nav-tab" href="#latest-lessons" data-i18n="topics">Topics</a>
-        <a class="nav-tab" href="#latest-lessons" data-i18n="latest_lessons">Latest Lessons</a>
+        <a class="nav-tab" href="{{homePath}}#languages" data-i18n="languages">Languages</a>
+        <a class="nav-tab" href="{{homePath}}#how-it-works" data-i18n="how_it_works">How it works</a>
+        <a class="nav-tab" href="{{homePath}}/chinese/#latest-lessons" data-i18n="latest_lessons">Latest Lessons</a>
       </nav>
       <div class="header-right">
         <select id="interface-language" class="lang-select" aria-label="Interface language">
           <option value="en">English</option>
           <option value="vi">Tiếng Việt</option>
         </select>
-        <a class="btn header-cta" href="#" data-i18n="start_listening">Start Listening</a>
       </div>
     </div>
   </header>
   <main class="wrap">{{content}}</main>
   <footer class="site-footer wrap">
-    <p>© Listening Chinese With Me</p>
+    <p>© Listening With Me</p>
   </footer>
 </body>
 </html>
