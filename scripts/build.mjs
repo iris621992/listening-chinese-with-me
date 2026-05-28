@@ -22,6 +22,15 @@ const REQUIRED_SECTIONS = [
   'image_timeline'
 ];
 
+const PUBLIC_SECTIONS = [
+  'chinese',
+  'pinyin',
+  'vietnamese',
+  'english',
+  'vocabulary',
+  'grammar_notes'
+];
+
 const SECTION_LABELS = {
   chinese: 'Chinese',
   pinyin: 'Pinyin',
@@ -29,7 +38,7 @@ const SECTION_LABELS = {
   english: 'English',
   vocabulary: 'Vocabulary',
   grammar_notes: 'Grammar Notes',
-  video_description: 'Video Description',
+  video_description: 'About this lesson',
   pinned_comment: 'Pinned Comment',
   thumbnail_idea: 'Thumbnail Idea',
   image_timeline: 'Image Timeline'
@@ -96,8 +105,8 @@ function renderSectionBody(raw) {
 function toHtmlSections(md) {
   const sections = parseSections(md);
 
-  return REQUIRED_SECTIONS.map((key) => {
-    const content = sections[key] || '<p class="missing">(Chưa có nội dung)</p>';
+  return PUBLIC_SECTIONS.map((key) => {
+    const content = sections[key] || '<p class="missing">(Content missing)</p>';
     return `<section class="card lesson-section" data-section="${key}"><h2>${SECTION_LABELS[key]}</h2>${renderSectionBody(content)}</section>`;
   }).join('');
 }
@@ -139,11 +148,12 @@ function build() {
     const { meta, body } = parseFrontmatter(raw);
     validateLesson(meta, body, file);
 
+    const sections = parseSections(body);
     const slug = meta.slug;
     const pageDir = path.join(distDir, 'lessons', slug);
     ensure(pageDir);
 
-    const top = `<article class="card lesson-header"><h1>${meta.title}</h1><p class="meta">${meta.hsk}</p><p>${meta.summary}</p><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Xem trên YouTube</a></p></article>`;
+    const top = `<article class="card lesson-header"><h1>${meta.title}</h1><p class="meta">${meta.hsk}</p><p>${meta.summary}</p><section class="lesson-overview" aria-label="${SECTION_LABELS.video_description}"><h2>${SECTION_LABELS.video_description}</h2>${renderSectionBody(sections.video_description)}</section><p><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer">Watch on YouTube</a></p></article>`;
     const html = renderPage(meta.title, top + toHtmlSections(body), { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
     fs.writeFileSync(path.join(pageDir, 'index.html'), html, 'utf8');
 
@@ -154,7 +164,7 @@ function build() {
     .map((x) => `<article class="card"><h2><a href="${x.url}">${x.title}</a></h2><p class="meta">${x.hsk}</p><p>${x.summary}</p></article>`)
     .join('');
 
-  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Danh sách bài nghe</h2><p>Chọn bài để luyện nghe.</p></section>${list}`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
+  const home = renderPage('Listening Chinese With Me', `<section class="card"><h2>Listening Lessons</h2><p>Choose a lesson to practice listening.</p></section>${list}`, { assetPath: `${SITE_BASE}/`, homePath: `${SITE_BASE}/` });
   fs.writeFileSync(path.join(distDir, 'index.html'), home, 'utf8');
 }
 
