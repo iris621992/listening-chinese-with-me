@@ -236,27 +236,128 @@ function sentenceSplitLocalized(raw) {
     .filter(Boolean);
 }
 
+function countHanziSyllables(value = '') {
+  const hanzi = value.match(/[\p{Script=Han}]/gu) || [];
+  const withoutErSuffix = hanzi.length > 1 && hanzi.at(-1) === '儿' ? hanzi.slice(0, -1) : hanzi;
+  return withoutErSuffix.length;
+}
+
+function countPinyinSyllables(value = '') {
+  const vowelGroups = value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .match(/[aeiouüv]+/g);
+  return Math.max(1, vowelGroups ? vowelGroups.length : 0);
+}
+
+function cleanPinyinToken(value = '') {
+  return value.replace(/^[\s,.;:!?，。！？；：、“”"'()\[\]{}]+|[\s,.;:!?，。！？；：、“”"'()\[\]{}]+$/g, '');
+}
+
+function pinyinUnits(value = '') {
+  return value
+    .replace(/[—–-]/g, ' ')
+    .split(/\s+/)
+    .map(cleanPinyinToken)
+    .filter(Boolean);
+}
+
+function hanziSegments(value = '') {
+  const fallbackSegments = Array.from(value.matchAll(/[\p{Script=Han}]+|[^\p{Script=Han}]+/gu), ([segment]) => segment.trim()).filter(Boolean);
+  if (typeof Intl === 'undefined' || typeof Intl.Segmenter === 'undefined') return fallbackSegments;
+  const segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+  return Array.from(segmenter.segment(value), ({ segment }) => segment.trim()).filter(Boolean);
+}
+
+function autoTokenizeSubtitleLine(text = '', pinyin = '') {
+  const units = pinyinUnits(pinyin);
+  if (!text || !units.length) return [];
+
+  let cursor = 0;
+  const tokens = [];
+
+  for (const segment of hanziSegments(text)) {
+    const expectedSyllables = countHanziSyllables(segment);
+    if (!expectedSyllables) {
+      const previous = tokens.at(-1);
+      if (previous) previous.hanzi = `${previous.hanzi}${segment}`;
+      continue;
+    }
+
+    const pinyinParts = [];
+    let actualSyllables = 0;
+    while (cursor < units.length && actualSyllables < expectedSyllables) {
+      const unit = units[cursor];
+      pinyinParts.push(unit);
+      actualSyllables += countPinyinSyllables(unit);
+      cursor += 1;
+    }
+
+    if (actualSyllables !== expectedSyllables || !pinyinParts.length) return [];
+    tokens.push({ hanzi: segment, pinyin: pinyinParts.join(' ') });
+  }
+
+  return cursor === units.length ? tokens : [];
+}
+
+function normalizeSubtitleTokens(tokens) {
+  if (!Array.isArray(tokens)) return [];
+  return tokens
+    .map((token) => ({
+      hanzi: String(token?.hanzi || '').trim(),
+      pinyin: String(token?.pinyin || '').trim()
+    }))
+    .filter((token) => token.hanzi);
+}
+
+function parseTokenizedSubtitleRows(sections) {
+  const raw = sections.subtitle_tokens || sections.tokenized_subtitles || '';
+  if (!raw.trim()) return [];
+  try {
+    const rows = JSON.parse(raw);
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row) => normalizeSubtitleTokens(row?.tokens || row));
+  } catch (e) {
+    return [];
+  }
+}
+
 function makeSubtitleRows(sections) {
   const chinese = sentenceSplitChinese(sections.chinese || '');
   const pinyin = sentenceSplitLocalized(sections.pinyin || '');
   const vietnamese = sentenceSplitLocalized(sections.vietnamese || '');
+  const tokenizedRows = parseTokenizedSubtitleRows(sections);
 
-  return chinese.map((text, index) => ({
-    text,
-    pinyin: pinyin[index] || '',
-    vietnamese: vietnamese[index] || ''
-  }));
+  return chinese.map((text, index) => {
+    const rowPinyin = pinyin[index] || '';
+    const explicitTokens = normalizeSubtitleTokens(tokenizedRows[index]);
+
+    return {
+      text,
+      pinyin: rowPinyin,
+      vietnamese: vietnamese[index] || '',
+      tokens: explicitTokens.length ? explicitTokens : autoTokenizeSubtitleLine(text, rowPinyin)
+    };
+  });
+}
+
+function renderSubtitleTokens(tokens = []) {
+  return tokens
+    .map((token) => `<span class="lesson-subtitle-token"><span class="lesson-subtitle-token-pinyin">${escapeHtml(token.pinyin)}</span><span class="lesson-subtitle-token-hanzi">${escapeHtml(token.hanzi)}</span></span>`)
+    .join('');
 }
 
 function renderSubtitleCard(rows) {
-  const first = rows[0] || { text: '', pinyin: '', vietnamese: '' };
-  return `<div class="lesson-subtitle-wrap" aria-live="polite"><div class="lesson-subtitle-card" data-subtitle-card="true"><p class="lesson-subtitle-pinyin" data-subtitle-pinyin>${escapeHtml(first.pinyin)}</p><p class="lesson-subtitle-chinese" data-subtitle-chinese>${escapeHtml(first.text)}</p></div><p class="lesson-subtitle-translation" data-subtitle-translation data-localized-content="vi" hidden>${escapeHtml(first.vietnamese)}</p></div>`;
+  const first = rows[0] || { text: '', pinyin: '', vietnamese: '', tokens: [] };
+  const hasTokens = first.tokens?.length > 0;
+  return `<div class="lesson-subtitle-wrap" aria-live="polite"><div class="lesson-subtitle-card" data-subtitle-card="true"><div class="lesson-subtitle-tokens${hasTokens ? '' : ' is-hidden'}" data-subtitle-tokens-list>${renderSubtitleTokens(first.tokens)}</div><div class="lesson-subtitle-fallback${hasTokens ? ' is-hidden' : ''}" data-subtitle-fallback><p class="lesson-subtitle-pinyin" data-subtitle-pinyin>${escapeHtml(first.pinyin)}</p><p class="lesson-subtitle-chinese" data-subtitle-chinese>${escapeHtml(first.text)}</p></div></div><p class="lesson-subtitle-translation" data-subtitle-translation data-localized-content="vi" hidden>${escapeHtml(first.vietnamese)}</p></div>`;
 }
 
 function renderTranscriptLines(rows) {
   if (!rows.length) return '<p class="missing">(Content missing)</p>';
   return rows
-    .map((line, index) => `<li class="transcript-line${index === 0 ? ' active' : ''}" data-subtitle-line="true" data-subtitle-text="${escapeHtml(line.text)}" data-subtitle-pinyin="${escapeHtml(line.pinyin)}" data-subtitle-vietnamese="${escapeHtml(line.vietnamese)}" tabindex="0"><span class="transcript-cue" aria-hidden="true">▶</span><span class="transcript-line-text">${escapeHtml(line.text)}</span><span class="sr-only">Line ${index + 1}</span></li>`)
+    .map((line, index) => `<li class="transcript-line${index === 0 ? ' active' : ''}" data-subtitle-line="true" data-subtitle-text="${escapeHtml(line.text)}" data-subtitle-pinyin="${escapeHtml(line.pinyin)}" data-subtitle-vietnamese="${escapeHtml(line.vietnamese)}" data-subtitle-tokens="${escapeHtml(JSON.stringify(line.tokens || []))}" tabindex="0"><span class="transcript-cue" aria-hidden="true">▶</span><span class="transcript-line-text">${escapeHtml(line.text)}</span><span class="sr-only">Line ${index + 1}</span></li>`)
     .join('');
 }
 
@@ -295,7 +396,7 @@ function renderPage(title, content, { assetPath = './', homePath = './' } = {}) 
 function copyAssets() { ensure(path.join(distDir, 'assets/css')); fs.copyFileSync(path.join(root, 'src/assets/css/style.css'), path.join(distDir, 'assets/css/style.css')); }
 
 function baseScript(isLesson) {
-  return `<script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});document.querySelectorAll('[data-localized-content]').forEach((el)=>{el.hidden=el.dataset.localizedContent!==selected;});const noneLabel=document.querySelector('[data-i18n-radio-none]');if(noneLabel)noneLabel.parentElement.lastChild.textContent=' '+ui[selected].no_translation;if(langSelect)langSelect.value=selected;}function initStudyTabs(){const tabs=document.querySelectorAll('[data-study-tab]');const panels=document.querySelectorAll('[data-study-panel]');if(!tabs.length||!panels.length)return;function activate(mode){tabs.forEach((tab)=>{const active=tab.dataset.studyTab===mode;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));});panels.forEach((panel)=>{panel.hidden=panel.dataset.studyPanel!==mode;});}tabs.forEach((tab)=>tab.addEventListener('click',()=>activate(tab.dataset.studyTab)));activate('shadowing');}function initSubtitleTimeline(){const list=document.querySelector('.transcript-lines');const iframe=document.querySelector('[data-youtube-player="true"]');const pinyinEl=document.querySelector('[data-subtitle-pinyin]');const chineseEl=document.querySelector('[data-subtitle-chinese]');const translationEl=document.querySelector('[data-subtitle-translation]');if(!list||!pinyinEl||!chineseEl)return;const lines=Array.from(list.querySelectorAll('[data-subtitle-line="true"]'));if(!lines.length)return;let player=null;let ready=false;let pendingSeek=null;let activeLine=null;function updateSubtitle(line){if(!line)return;pinyinEl.textContent=line.dataset.subtitlePinyin||'';chineseEl.textContent=line.dataset.subtitleText||line.querySelector('.transcript-line-text')?.textContent||'';if(translationEl)translationEl.textContent=line.dataset.subtitleVietnamese||'';}function setActive(line,scroll){if(activeLine===line){if(activeLine&&scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});return;}if(activeLine)activeLine.classList.remove('active');activeLine=line;if(activeLine){activeLine.classList.add('active');updateSubtitle(activeLine);if(scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});}}function syncAt(time,scroll){const next=lines.find((line)=>line.dataset.start&&line.dataset.end&&time>=Number(line.dataset.start)&&time<Number(line.dataset.end));setActive(next||null,scroll);}function chooseLine(line){const start=Number(line.dataset.start);setActive(line,true);if(player&&ready&&Number.isFinite(start)){player.seekTo(start,true);player.playVideo();}else if(Number.isFinite(start)){pendingSeek=start;}}lines.forEach((line)=>{line.addEventListener('click',()=>chooseLine(line));line.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseLine(line);}});});setActive(lines.find((line)=>line.classList.contains('active'))||lines[0],false);if(!list.matches('[data-transcript-timeline="true"]')||!iframe)return;function startPolling(){window.setInterval(()=>{if(player&&ready&&typeof player.getCurrentTime==='function')syncAt(player.getCurrentTime(),true);},350);}function onReady(){ready=true;if(pendingSeek!==null){player.seekTo(pendingSeek,true);player.playVideo();pendingSeek=null;}startPolling();}window.onYouTubeIframeAPIReady=function(){player=new YT.Player(iframe,{events:{onReady}});};const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);}if(langSelect){langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);if(${isLesson}&&!localStorage.getItem('lessonTranslation')){setDefaultTranslation(e.target.value);}});}const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden=section.dataset.translation!==mode||mode==='none';});radios.forEach((r)=>{r.checked=r.value===mode;});if(${isLesson})localStorage.setItem('lessonTranslation',mode);}function setDefaultTranslation(lang){renderTranslation(lang==='vi'?'vietnamese':'english');}if(${isLesson}){initStudyTabs();initSubtitleTimeline();const saved=localStorage.getItem('lessonTranslation');if(saved){renderTranslation(saved);}else{setDefaultTranslation(savedLang);}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));}applyLang(savedLang);})();</script>`;
+  return `<script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});document.querySelectorAll('[data-localized-content]').forEach((el)=>{el.hidden=el.dataset.localizedContent!==selected;});const noneLabel=document.querySelector('[data-i18n-radio-none]');if(noneLabel)noneLabel.parentElement.lastChild.textContent=' '+ui[selected].no_translation;if(langSelect)langSelect.value=selected;}function initStudyTabs(){const tabs=document.querySelectorAll('[data-study-tab]');const panels=document.querySelectorAll('[data-study-panel]');if(!tabs.length||!panels.length)return;function activate(mode){tabs.forEach((tab)=>{const active=tab.dataset.studyTab===mode;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));});panels.forEach((panel)=>{panel.hidden=panel.dataset.studyPanel!==mode;});}tabs.forEach((tab)=>tab.addEventListener('click',()=>activate(tab.dataset.studyTab)));activate('shadowing');}function initSubtitleTimeline(){const list=document.querySelector('.transcript-lines');const iframe=document.querySelector('[data-youtube-player="true"]');const tokensEl=document.querySelector('[data-subtitle-tokens-list]');const fallbackEl=document.querySelector('[data-subtitle-fallback]');const pinyinEl=document.querySelector('[data-subtitle-pinyin]');const chineseEl=document.querySelector('[data-subtitle-chinese]');const translationEl=document.querySelector('[data-subtitle-translation]');if(!list||!tokensEl||!fallbackEl||!pinyinEl||!chineseEl)return;const lines=Array.from(list.querySelectorAll('[data-subtitle-line="true"]'));if(!lines.length)return;let player=null;let ready=false;let pendingSeek=null;let activeLine=null;function parseTokens(line){try{const tokens=JSON.parse(line.dataset.subtitleTokens||'[]');return Array.isArray(tokens)?tokens.filter((token)=>token&&token.hanzi):[];}catch(e){return [];}}function renderTokens(tokens){tokensEl.replaceChildren(...tokens.map((token)=>{const wrapper=document.createElement('span');wrapper.className='lesson-subtitle-token';const pinyin=document.createElement('span');pinyin.className='lesson-subtitle-token-pinyin';pinyin.textContent=token.pinyin||'';const hanzi=document.createElement('span');hanzi.className='lesson-subtitle-token-hanzi';hanzi.textContent=token.hanzi||'';wrapper.append(pinyin,hanzi);return wrapper;}));}function updateSubtitle(line){if(!line)return;const tokens=parseTokens(line);if(tokens.length){renderTokens(tokens);tokensEl.classList.remove('is-hidden');fallbackEl.classList.add('is-hidden');}else{tokensEl.replaceChildren();tokensEl.classList.add('is-hidden');fallbackEl.classList.remove('is-hidden');pinyinEl.textContent=line.dataset.subtitlePinyin||'';chineseEl.textContent=line.dataset.subtitleText||line.querySelector('.transcript-line-text')?.textContent||'';}if(translationEl)translationEl.textContent=line.dataset.subtitleVietnamese||'';}function setActive(line,scroll){if(activeLine===line){if(activeLine&&scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});return;}if(activeLine)activeLine.classList.remove('active');activeLine=line;if(activeLine){activeLine.classList.add('active');updateSubtitle(activeLine);if(scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});}}function syncAt(time,scroll){const next=lines.find((line)=>line.dataset.start&&line.dataset.end&&time>=Number(line.dataset.start)&&time<Number(line.dataset.end));setActive(next||null,scroll);}function chooseLine(line){const start=Number(line.dataset.start);setActive(line,true);if(player&&ready&&Number.isFinite(start)){player.seekTo(start,true);player.playVideo();}else if(Number.isFinite(start)){pendingSeek=start;}}lines.forEach((line)=>{line.addEventListener('click',()=>chooseLine(line));line.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseLine(line);}});});setActive(lines.find((line)=>line.classList.contains('active'))||lines[0],false);if(!list.matches('[data-transcript-timeline="true"]')||!iframe)return;function startPolling(){window.setInterval(()=>{if(player&&ready&&typeof player.getCurrentTime==='function')syncAt(player.getCurrentTime(),true);},350);}function onReady(){ready=true;if(pendingSeek!==null){player.seekTo(pendingSeek,true);player.playVideo();pendingSeek=null;}startPolling();}window.onYouTubeIframeAPIReady=function(){player=new YT.Player(iframe,{events:{onReady}});};const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);}if(langSelect){langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);if(${isLesson}&&!localStorage.getItem('lessonTranslation')){setDefaultTranslation(e.target.value);}});}const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden=section.dataset.translation!==mode||mode==='none';});radios.forEach((r)=>{r.checked=r.value===mode;});if(${isLesson})localStorage.setItem('lessonTranslation',mode);}function setDefaultTranslation(lang){renderTranslation(lang==='vi'?'vietnamese':'english');}if(${isLesson}){initStudyTabs();initSubtitleTimeline();const saved=localStorage.getItem('lessonTranslation');if(saved){renderTranslation(saved);}else{setDefaultTranslation(savedLang);}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));}applyLang(savedLang);})();</script>`;
 }
 
 function build() {
