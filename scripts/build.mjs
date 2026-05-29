@@ -143,9 +143,15 @@ function extractYouTubeId(url) {
   return null;
 }
 
+function appendQueryParams(url, params) {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}${params}`;
+}
+
 function toYouTubeEmbedUrl(url) {
   const id = extractYouTubeId(url);
-  return id ? `https://www.youtube.com/embed/${id}` : null;
+  if (!id) return null;
+  return appendQueryParams(`https://www.youtube.com/embed/${id}`, 'rel=0&modestbranding=1&playsinline=1');
 }
 
 function renderSectionBody(raw) { const lines = raw.split('\n'); let html = ''; let inList = false; for (const line of lines) { if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${line.slice(2)}</li>`; continue; } if (line.trim() === '') { if (inList) { html += '</ul>'; inList = false; } continue; } if (inList) { html += '</ul>'; inList = false; } html += `<p>${line}</p>`; } if (inList) html += '</ul>'; return html; }
