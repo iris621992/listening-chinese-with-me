@@ -141,8 +141,10 @@ ul { padding-left: 1.2rem; margin: 0; }
 .status.available { background: #e6f5ea; color: #2f6b46; }
 .status.soon { background: #fff1e7; color: #8a5a44; }
 
-.lesson-hero { display: grid; grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); gap: 20px; align-items: stretch; background: linear-gradient(130deg, #fffdfa, #fdf3ea); }
-.lesson-overview { margin: 0; padding: 0.95rem; border: 1px solid var(--line); border-radius: 16px; background: #fff8f1; }
+.lesson-hero { display: flex; align-items: center; gap: clamp(0.75rem, 2vw, 1.15rem); padding-block: clamp(0.75rem, 1.5vw, 1rem); background: linear-gradient(130deg, #fffdfa, #fdf3ea); }
+.lesson-hero h1 { margin-bottom: 0.2rem; font-size: clamp(1.55rem, 3vw, 2.25rem); }
+.lesson-hero .badge { flex: 0 0 auto; }
+.lesson-summary { margin: 0; max-width: 68rem; }
 .study-intro { background: #f5fbf6; }
 .lesson-section p,
 .lesson-section li { overflow-wrap: anywhere; }
@@ -162,6 +164,13 @@ ul { padding-left: 1.2rem; margin: 0; }
 .study-mode-tab { cursor: pointer; font-family: inherit; }
 .study-mode-tab.is-active,
 .content-tab.is-active { background: #6d9478; color: #fff; border-color: #6d9478; box-shadow: 0 8px 18px rgba(109, 148, 120, 0.22); }
+.study-tab-panel[hidden] { display: none; }
+.study-placeholder-panel,
+.study-summary-panel { border: 1px solid var(--line); border-radius: 18px; background: #fffdf9; padding: clamp(1rem, 2vw, 1.35rem); }
+.study-placeholder-panel p { margin: 0; color: var(--muted); font-weight: 700; }
+.study-summary-panel h2 { margin-top: 0; }
+.study-summary-panel p { margin: 0 0 0.85rem; max-width: 78rem; }
+.study-summary-panel p:last-child { margin-bottom: 0; }
 .study-player-grid { display: grid; grid-template-columns: minmax(0, 68fr) minmax(300px, 32fr); gap: 20px; align-items: stretch; }
 .study-video-column,
 .transcript-panel { min-width: 0; }
@@ -201,8 +210,8 @@ ul { padding-left: 1.2rem; margin: 0; }
   :root { --shell-padding: clamp(0.8rem, 3.8vw, 1.25rem); }
   .site-shell,
   .lesson-shell { width: calc(100% - 32px); }
-  .home-hero,
-  .lesson-hero { grid-template-columns: 1fr; }
+  .home-hero { grid-template-columns: 1fr; }
+  .lesson-hero { align-items: flex-start; }
   .home-hero { min-height: 0; }
   .hero-title { max-width: 16ch; }
   .hero-visual { min-height: 220px; }
