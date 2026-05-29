@@ -10,8 +10,9 @@
   --line: #e8d7c6;
   --shadow: 0 14px 28px rgba(95, 71, 53, 0.1);
   --shell-padding: clamp(0.85rem, 2.4vw, 2rem);
-  --site-max: 1320px;
+  --site-max: 1440px;
   --wide-max: 1480px;
+  --lesson-max: 1440px;
   --reading-max: 1160px;
   --video-max: 1500px;
 }
@@ -34,7 +35,11 @@ body {
   width: calc(100% - (var(--shell-padding) * 2));
   margin-inline: auto;
 }
-.site-shell { max-width: var(--site-max); }
+.lesson-shell {
+  width: min(100% - 48px, var(--lesson-max));
+  margin-inline: auto;
+}
+.site-shell { width: min(100% - 48px, var(--site-max)); max-width: var(--site-max); }
 .wide-shell { max-width: var(--wide-max); }
 .reading-shell { max-width: var(--reading-max); }
 .video-shell { max-width: var(--video-max); }
@@ -136,7 +141,7 @@ ul { padding-left: 1.2rem; margin: 0; }
 .status.available { background: #e6f5ea; color: #2f6b46; }
 .status.soon { background: #fff1e7; color: #8a5a44; }
 
-.lesson-hero { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(20rem, 1.05fr); gap: 1rem; align-items: stretch; background: linear-gradient(130deg, #fffdfa, #fdf3ea); }
+.lesson-hero { display: grid; grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); gap: 20px; align-items: stretch; background: linear-gradient(130deg, #fffdfa, #fdf3ea); }
 .lesson-overview { margin: 0; padding: 0.95rem; border: 1px solid var(--line); border-radius: 16px; background: #fff8f1; }
 .study-intro { background: #f5fbf6; }
 .lesson-section p,
@@ -157,14 +162,14 @@ ul { padding-left: 1.2rem; margin: 0; }
 .study-mode-tab { cursor: pointer; font-family: inherit; }
 .study-mode-tab.is-active,
 .content-tab.is-active { background: #6d9478; color: #fff; border-color: #6d9478; box-shadow: 0 8px 18px rgba(109, 148, 120, 0.22); }
-.study-player-grid { display: grid; grid-template-columns: minmax(0, 68fr) minmax(300px, 32fr); gap: clamp(1rem, 1.6vw, 1.5rem); align-items: stretch; }
+.study-player-grid { display: grid; grid-template-columns: minmax(0, 68fr) minmax(300px, 32fr); gap: 20px; align-items: stretch; }
 .study-video-column,
 .transcript-panel { min-width: 0; }
 .study-video-column .lesson-video { margin: 0; }
 .study-video-column .lesson-video-frame { max-width: none; margin: 0; border-radius: 18px; box-shadow: 0 18px 30px rgba(49, 37, 28, 0.16); }
 .lesson-video-placeholder { display: grid; place-items: center; color: #fff; }
 .lesson-video-placeholder p { margin: 0; }
-.transcript-panel { display: flex; flex-direction: column; height: 100%; min-height: 260px; max-height: min(720px, calc((min(100vw - (var(--shell-padding) * 2), var(--video-max)) - clamp(1rem, 1.6vw, 1.5rem)) * 0.68 * 0.5625)); background: #fffdf9; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.transcript-panel { display: flex; flex-direction: column; height: 100%; min-height: 260px; max-height: min(720px, calc((min(100vw - 48px, var(--lesson-max)) - 20px) * 0.68 * 0.5625)); background: #fffdf9; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7); }
 .transcript-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0.8rem 1rem; border-bottom: 1px solid var(--line); background: #fff8f1; }
 .transcript-panel-header h2 { margin: 0; font-size: 1.05rem; }
 .transcript-panel-header span { font-size: 0.78rem; font-weight: 800; background: #dce9fb; border-radius: 999px; padding: 0.18rem 0.5rem; color: #51616f; }
@@ -194,6 +199,8 @@ ul { padding-left: 1.2rem; margin: 0; }
 
 @media (max-width: 820px) {
   :root { --shell-padding: clamp(0.8rem, 3.8vw, 1.25rem); }
+  .site-shell,
+  .lesson-shell { width: calc(100% - 32px); }
   .home-hero,
   .lesson-hero { grid-template-columns: 1fr; }
   .home-hero { min-height: 0; }
@@ -206,6 +213,7 @@ ul { padding-left: 1.2rem; margin: 0; }
 
 @media (max-width: 580px) {
   :root { --shell-padding: 1rem; }
+  .lesson-shell { width: calc(100% - 24px); }
   .site-main { padding-block: 0.85rem; }
   .page-flow,
   .lesson-content-flow { gap: 0.85rem; }
