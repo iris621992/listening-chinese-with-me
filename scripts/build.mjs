@@ -148,10 +148,36 @@ function appendQueryParams(url, params) {
   return `${url}${separator}${params}`;
 }
 
-function toYouTubeEmbedUrl(url) {
+function toYouTubeEmbedUrl(url, { enableJsApi = false } = {}) {
   const id = extractYouTubeId(url);
   if (!id) return null;
-  return appendQueryParams(`https://www.youtube.com/embed/${id}`, 'rel=0&modestbranding=1&playsinline=1');
+  const params = `rel=0&modestbranding=1&playsinline=1${enableJsApi ? '&enablejsapi=1' : ''}`;
+  return appendQueryParams(`https://www.youtube.com/embed/${id}`, params);
+}
+
+function parseTimelineTime(raw) {
+  const parts = raw.trim().split(':');
+  if (parts.length < 2 || parts.length > 3) return null;
+  const seconds = Number(parts.pop());
+  const minutes = Number(parts.pop());
+  const hours = parts.length ? Number(parts.pop()) : 0;
+  if (![hours, minutes, seconds].every(Number.isFinite)) return null;
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+function parseSubtitleTimeline(raw = '') {
+  const normalized = raw.replace(/\r/g, '').trim();
+  if (!normalized) return [];
+  return normalized.split(/\n{2,}/).map((block) => {
+    const [timeLine, ...textLines] = block.split('\n');
+    const match = (timeLine || '').match(/^\s*(\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*-->\s*(\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?)\s*$/);
+    if (!match) return null;
+    const start = parseTimelineTime(match[1]);
+    const end = parseTimelineTime(match[2]);
+    const text = textLines.join(' ').trim();
+    if (start === null || end === null || end <= start || !text) return null;
+    return { start, end, text };
+  }).filter(Boolean);
 }
 
 function renderSectionBody(raw) { const lines = raw.split('\n'); let html = ''; let inList = false; for (const line of lines) { if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${line.slice(2)}</li>`; continue; } if (line.trim() === '') { if (inList) { html += '</ul>'; inList = false; } continue; } if (inList) { html += '</ul>'; inList = false; } html += `<p>${line}</p>`; } if (inList) html += '</ul>'; return html; }
@@ -205,12 +231,23 @@ function renderTranscriptLines(raw) {
     .join('');
 }
 
-function renderStudyPlayer({ meta, sections, youtubeEmbed, youtubeWatchButton }) {
+function renderTimelineTranscriptLines(timeline) {
+  if (!timeline.length) return '';
+  return timeline
+    .map((line, index) => `<li class="transcript-line" data-start="${line.start}" data-end="${line.end}" tabindex="0"><span class="transcript-cue" aria-hidden="true">▶</span><span class="transcript-line-text">${line.text}</span><span class="sr-only">Line ${index + 1}</span></li>`)
+    .join('');
+}
+
+function renderStudyPlayer({ meta, sections, youtubeEmbed, youtubeWatchButton, hasSubtitleTimeline }) {
+  const iframeId = hasSubtitleTimeline ? ' id="lesson-youtube-player" data-youtube-player="true"' : '';
   const videoBlock = youtubeEmbed
-    ? `<div class="lesson-video-frame"><iframe src="${youtubeEmbed}" title="${meta.title} - YouTube video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>${youtubeWatchButton}`
+    ? `<div class="lesson-video-frame"><iframe${iframeId} src="${youtubeEmbed}" title="${meta.title} - YouTube video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>${youtubeWatchButton}`
     : '<div class="lesson-video-frame lesson-video-placeholder"><p>Video coming soon</p></div>';
   const summaryBody = renderLocalizedSectionBody(sections.video_description || '');
-  return `<section class="study-player-layout lesson-page-block card" aria-label="Video study player"><div class="study-mode-tabs" role="tablist" aria-label="Study modes"><button type="button" id="study-tab-shadowing" class="study-mode-tab is-active" role="tab" aria-selected="true" aria-controls="study-panel-shadowing" data-study-tab="shadowing" data-i18n="shadowing">Shadowing</button><button type="button" id="study-tab-pronunciation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-pronunciation" data-study-tab="pronunciation" data-i18n="pronunciation">Pronunciation</button><button type="button" id="study-tab-dictation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-dictation" data-study-tab="dictation" data-i18n="dictation">Dictation</button><button type="button" id="study-tab-summary" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-summary" data-study-tab="summary" data-i18n="summary_tab">Summary</button></div><div id="study-panel-shadowing" class="study-tab-panel" role="tabpanel" aria-labelledby="study-tab-shadowing" data-study-panel="shadowing"><div class="study-player-grid"><div class="study-video-column"><section class="lesson-video" aria-label="Lesson video">${videoBlock}</section></div><aside class="transcript-panel" aria-label="Transcript"><div class="transcript-panel-header"><h2 data-i18n="transcript">Transcript</h2><span>${meta.hsk}</span></div><ol class="transcript-lines">${renderTranscriptLines(sections.chinese || '')}</ol></aside></div></div><div id="study-panel-pronunciation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-pronunciation" data-study-panel="pronunciation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-dictation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-dictation" data-study-panel="dictation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-summary" class="study-tab-panel study-summary-panel" role="tabpanel" aria-labelledby="study-tab-summary" data-study-panel="summary" hidden><section id="lesson-summary-tab" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${summaryBody}</section></div></section>`;
+  const timeline = hasSubtitleTimeline ? parseSubtitleTimeline(sections.subtitle_timeline) : [];
+  const transcriptListAttrs = timeline.length ? ' class="transcript-lines" data-transcript-timeline="true"' : ' class="transcript-lines"';
+  const transcriptLines = timeline.length ? renderTimelineTranscriptLines(timeline) : renderTranscriptLines(sections.chinese || '');
+  return `<section class="study-player-layout lesson-page-block card" aria-label="Video study player"><div class="study-mode-tabs" role="tablist" aria-label="Study modes"><button type="button" id="study-tab-shadowing" class="study-mode-tab is-active" role="tab" aria-selected="true" aria-controls="study-panel-shadowing" data-study-tab="shadowing" data-i18n="shadowing">Shadowing</button><button type="button" id="study-tab-pronunciation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-pronunciation" data-study-tab="pronunciation" data-i18n="pronunciation">Pronunciation</button><button type="button" id="study-tab-dictation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-dictation" data-study-tab="dictation" data-i18n="dictation">Dictation</button><button type="button" id="study-tab-summary" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-summary" data-study-tab="summary" data-i18n="summary_tab">Summary</button></div><div id="study-panel-shadowing" class="study-tab-panel" role="tabpanel" aria-labelledby="study-tab-shadowing" data-study-panel="shadowing"><div class="study-player-grid"><div class="study-video-column"><section class="lesson-video" aria-label="Lesson video">${videoBlock}</section></div><aside class="transcript-panel" aria-label="Transcript"><div class="transcript-panel-header"><h2 data-i18n="transcript">Transcript</h2><span>${meta.hsk}</span></div><ol${transcriptListAttrs}>${transcriptLines}</ol></aside></div></div><div id="study-panel-pronunciation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-pronunciation" data-study-panel="pronunciation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-dictation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-dictation" data-study-panel="dictation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-summary" class="study-tab-panel study-summary-panel" role="tabpanel" aria-labelledby="study-tab-summary" data-study-panel="summary" hidden><section id="lesson-summary-tab" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${summaryBody}</section></div></section>`;
 }
 
 function toHtmlSections(md) {
@@ -227,7 +264,7 @@ function renderPage(title, content, { assetPath = './', homePath = './' } = {}) 
 function copyAssets() { ensure(path.join(distDir, 'assets/css')); fs.copyFileSync(path.join(root, 'src/assets/css/style.css'), path.join(distDir, 'assets/css/style.css')); }
 
 function baseScript(isLesson) {
-  return `<script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});document.querySelectorAll('[data-localized-content]').forEach((el)=>{el.hidden=el.dataset.localizedContent!==selected;});const noneLabel=document.querySelector('[data-i18n-radio-none]');if(noneLabel)noneLabel.parentElement.lastChild.textContent=' '+ui[selected].no_translation;if(langSelect)langSelect.value=selected;}function initStudyTabs(){const tabs=document.querySelectorAll('[data-study-tab]');const panels=document.querySelectorAll('[data-study-panel]');if(!tabs.length||!panels.length)return;function activate(mode){tabs.forEach((tab)=>{const active=tab.dataset.studyTab===mode;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));});panels.forEach((panel)=>{panel.hidden=panel.dataset.studyPanel!==mode;});}tabs.forEach((tab)=>tab.addEventListener('click',()=>activate(tab.dataset.studyTab)));activate('shadowing');}if(langSelect){langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);if(${isLesson}&&!localStorage.getItem('lessonTranslation')){setDefaultTranslation(e.target.value);}});}const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden=section.dataset.translation!==mode||mode==='none';});radios.forEach((r)=>{r.checked=r.value===mode;});if(${isLesson})localStorage.setItem('lessonTranslation',mode);}function setDefaultTranslation(lang){renderTranslation(lang==='vi'?'vietnamese':'english');}if(${isLesson}){initStudyTabs();const saved=localStorage.getItem('lessonTranslation');if(saved){renderTranslation(saved);}else{setDefaultTranslation(savedLang);}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));}applyLang(savedLang);})();</script>`;
+  return `<script>(function(){const ui=${JSON.stringify(UI_TEXT)};const langSelect=document.getElementById('interface-language');const savedLang=localStorage.getItem('interfaceLanguage')||'en';function applyLang(lang){const selected=ui[lang]?lang:'en';document.documentElement.lang=selected;document.querySelectorAll('[data-i18n]').forEach((el)=>{const key=el.dataset.i18n;if(ui[selected][key])el.textContent=ui[selected][key];});document.querySelectorAll('[data-localized-content]').forEach((el)=>{el.hidden=el.dataset.localizedContent!==selected;});const noneLabel=document.querySelector('[data-i18n-radio-none]');if(noneLabel)noneLabel.parentElement.lastChild.textContent=' '+ui[selected].no_translation;if(langSelect)langSelect.value=selected;}function initStudyTabs(){const tabs=document.querySelectorAll('[data-study-tab]');const panels=document.querySelectorAll('[data-study-panel]');if(!tabs.length||!panels.length)return;function activate(mode){tabs.forEach((tab)=>{const active=tab.dataset.studyTab===mode;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));});panels.forEach((panel)=>{panel.hidden=panel.dataset.studyPanel!==mode;});}tabs.forEach((tab)=>tab.addEventListener('click',()=>activate(tab.dataset.studyTab)));activate('shadowing');}function initSubtitleTimeline(){const list=document.querySelector('[data-transcript-timeline="true"]');const iframe=document.querySelector('[data-youtube-player="true"]');if(!list||!iframe)return;const lines=Array.from(list.querySelectorAll('[data-start][data-end]'));if(!lines.length)return;let player=null;let ready=false;let pendingSeek=null;let activeLine=null;function setActive(line,scroll){if(activeLine===line){if(activeLine&&scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});return;}if(activeLine)activeLine.classList.remove('active');activeLine=line;if(activeLine){activeLine.classList.add('active');if(scroll)activeLine.scrollIntoView({block:'nearest',behavior:'smooth'});}}function syncAt(time,scroll){const next=lines.find((line)=>time>=Number(line.dataset.start)&&time<Number(line.dataset.end));setActive(next||null,scroll);}function seekTo(line){const start=Number(line.dataset.start);setActive(line,true);if(player&&ready&&Number.isFinite(start)){player.seekTo(start,true);player.playVideo();}else{pendingSeek=start;}}lines.forEach((line)=>{line.addEventListener('click',()=>seekTo(line));line.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();seekTo(line);}});});function startPolling(){window.setInterval(()=>{if(player&&ready&&typeof player.getCurrentTime==='function')syncAt(player.getCurrentTime(),true);},350);}function onReady(){ready=true;if(pendingSeek!==null){player.seekTo(pendingSeek,true);player.playVideo();pendingSeek=null;}startPolling();}window.onYouTubeIframeAPIReady=function(){player=new YT.Player(iframe,{events:{onReady}});};const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);}if(langSelect){langSelect.addEventListener('change',(e)=>{localStorage.setItem('interfaceLanguage',e.target.value);applyLang(e.target.value);if(${isLesson}&&!localStorage.getItem('lessonTranslation')){setDefaultTranslation(e.target.value);}});}const radios=document.querySelectorAll('input[name="translation"]');const sections=document.querySelectorAll('.translation-section');function renderTranslation(mode){sections.forEach((section)=>{section.hidden=section.dataset.translation!==mode||mode==='none';});radios.forEach((r)=>{r.checked=r.value===mode;});if(${isLesson})localStorage.setItem('lessonTranslation',mode);}function setDefaultTranslation(lang){renderTranslation(lang==='vi'?'vietnamese':'english');}if(${isLesson}){initStudyTabs();initSubtitleTimeline();const saved=localStorage.getItem('lessonTranslation');if(saved){renderTranslation(saved);}else{setDefaultTranslation(savedLang);}radios.forEach((radio)=>radio.addEventListener('change',()=>renderTranslation(radio.value)));}applyLang(savedLang);})();</script>`;
 }
 
 function build() {
@@ -236,11 +273,12 @@ function build() {
   for (const file of files) {
     const { meta, body } = parseFrontmatter(fs.readFileSync(path.join(contentDir, file), 'utf8')); validateLesson(meta, body, file);
     const sections = parseSections(body); const pageDir = path.join(distDir, 'lessons', meta.slug); ensure(pageDir);
-    const youtubeEmbed = toYouTubeEmbedUrl(meta.youtube);
+    const hasSubtitleTimeline = parseSubtitleTimeline(sections.subtitle_timeline || '').length > 0;
+    const youtubeEmbed = toYouTubeEmbedUrl(meta.youtube, { enableJsApi: hasSubtitleTimeline });
     const youtubeWatchButton = meta.youtube
       ? `<p class="lesson-video-actions"><a class="btn" href="${meta.youtube}" target="_blank" rel="noreferrer" data-i18n="watch_youtube">Watch on YouTube</a></p>`
       : '';
-    const studyPlayer = renderStudyPlayer({ meta, sections, youtubeEmbed, youtubeWatchButton });
+    const studyPlayer = renderStudyPlayer({ meta, sections, youtubeEmbed, youtubeWatchButton, hasSubtitleTimeline });
     const top = `<div class="lesson-shell lesson-content-flow lesson-top-flow"><article class="lesson-hero lesson-page-block card"><p class="badge">${meta.hsk}</p><div><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div></article>${studyPlayer}<section class="study-intro lesson-page-block card"><h2 data-i18n="study_area">Study Area</h2></section></div>`;
     fs.writeFileSync(path.join(pageDir, 'index.html'), renderPage(meta.title, top + toHtmlSections(body) + baseScript(true), { assetPath: `${SITE_BASE}/`, homePath: SITE_BASE }), 'utf8');
     lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${meta.slug}/` });
