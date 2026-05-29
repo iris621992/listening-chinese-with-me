@@ -14,6 +14,7 @@
   --wide-max: 1480px;
   --lesson-max: 1440px;
   --lesson-gutter: 48px;
+  --lesson-width: min(calc(100% - var(--lesson-gutter)), var(--lesson-max));
   --reading-max: 1160px;
   --video-max: 1500px;
 }
@@ -37,7 +38,8 @@ body {
   margin-inline: auto;
 }
 .lesson-shell {
-  width: min(100% - var(--lesson-gutter), var(--lesson-max));
+  width: var(--lesson-width);
+  max-width: var(--lesson-max);
   margin-inline: auto;
 }
 .site-shell { width: min(100% - 48px, var(--site-max)); max-width: var(--site-max); }
@@ -142,9 +144,10 @@ ul { padding-left: 1.2rem; margin: 0; }
 .status.available { background: #e6f5ea; color: #2f6b46; }
 .status.soon { background: #fff1e7; color: #8a5a44; }
 
-.lesson-page-block { max-width: var(--lesson-max); }
+.lesson-page-block { width: 100%; max-width: 100%; }
+.lesson-top-flow { margin-bottom: 1.15rem; }
 .lesson-content-flow > .content-tabs,
-.lesson-content-flow > .lesson-page-block { width: 100%; }
+.lesson-content-flow > .lesson-page-block { justify-self: stretch; width: 100%; }
 
 .lesson-hero { display: flex; align-items: center; gap: clamp(0.75rem, 2vw, 1.15rem); padding-block: clamp(0.75rem, 1.5vw, 1rem); background: linear-gradient(130deg, #fffdfa, #fdf3ea); }
 .lesson-hero h1 { margin-bottom: 0.2rem; font-size: clamp(1.55rem, 3vw, 2.25rem); }
