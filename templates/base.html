@@ -19,7 +19,7 @@
       <nav class="header-controls" aria-label="Primary navigation">
         <a class="nav-tab is-active" href="{{homePath}}" data-i18n="home">Home</a>
         <div class="nav-dropdown">
-          <a class="nav-tab nav-dropdown-trigger" href="{{homePath}}#languages" data-i18n="languages">Languages</a>
+          <a class="nav-tab nav-dropdown-trigger" href="{{homePath}}#languages" data-i18n="languages" aria-haspopup="true" aria-expanded="false">Languages</a>
           <div class="nav-dropdown-menu" aria-label="Language channels">
             <a class="nav-dropdown-item active" href="{{homePath}}/chinese/">
               <span>Chinese Listening With Me</span>
@@ -53,5 +53,41 @@
   <footer class="site-footer site-shell">
     <p>© Listening With Me</p>
   </footer>
+
+  <script>
+    (function () {
+      const dropdown = document.querySelector('.nav-dropdown');
+      if (!dropdown) return;
+
+      const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+      const menu = dropdown.querySelector('.nav-dropdown-menu');
+      if (!trigger || !menu) return;
+
+      const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      function setOpen(isOpen) {
+        dropdown.classList.toggle('is-open', isOpen);
+        trigger.setAttribute('aria-expanded', String(isOpen));
+      }
+
+      trigger.addEventListener('click', function (event) {
+        if (canHover) return;
+        event.preventDefault();
+        setOpen(!dropdown.classList.contains('is-open'));
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!dropdown.contains(event.target)) setOpen(false);
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') setOpen(false);
+      });
+
+      menu.addEventListener('click', function (event) {
+        if (event.target.closest('a')) setOpen(false);
+      });
+    })();
+  </script>
 </body>
 </html>
