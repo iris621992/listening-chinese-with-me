@@ -307,7 +307,8 @@ function build() {
     const hasSubtitleTimeline = parseSubtitleTimeline(sections.subtitle_timeline || '').length > 0;
     const youtubeEmbed = toYouTubeEmbedUrl(meta.youtube, { enableJsApi: hasSubtitleTimeline });
     const studyPlayer = renderStudyPlayer({ meta, sections, youtubeEmbed, hasSubtitleTimeline });
-    const top = `<div class="lesson-shell lesson-content-flow lesson-top-flow"><article class="lesson-hero lesson-page-block card"><p class="badge">${meta.hsk}</p><div><h1>${meta.title}</h1><p class="lesson-summary">${meta.summary}</p></div></article>${studyPlayer}</div>`;
+    const lessonSeoHeader = `<div class="lesson-seo-heading"><h1>${meta.title}</h1><p>${meta.hsk}</p></div>`;
+    const top = `<div class="lesson-shell lesson-content-flow lesson-top-flow">${lessonSeoHeader}${studyPlayer}</div>`;
     fs.writeFileSync(path.join(pageDir, 'index.html'), renderPage(meta.title, top + toHtmlSections(body) + baseScript(true), { assetPath: `${SITE_BASE}/`, homePath: SITE_BASE }), 'utf8');
     lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${meta.slug}/` });
   }
