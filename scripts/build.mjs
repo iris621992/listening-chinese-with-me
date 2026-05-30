@@ -10,7 +10,6 @@ const SITE_BASE = '/listening-chinese-with-me';
 
 const REQUIRED_FRONTMATTER = ['title', 'slug', 'hsk', 'summary'];
 const REQUIRED_SECTIONS = ['chinese', 'pinyin', 'vietnamese', 'english', 'vocabulary', 'grammar_notes', 'video_description', 'pinned_comment', 'thumbnail_idea', 'image_timeline'];
-const STUDY_SECTIONS = ['chinese', 'pinyin', 'vocabulary', 'grammar_notes'];
 
 const SECTION_LABELS = {
   chinese: 'Chinese',
@@ -385,13 +384,8 @@ function renderStudyPlayer({ meta, sections, youtubeEmbed, hasSubtitleTimeline }
   return `<section class="study-player-layout lesson-page-block card" aria-label="Video study player"><div class="study-mode-tabs" role="tablist" aria-label="Study modes"><button type="button" id="study-tab-shadowing" class="study-mode-tab is-active" role="tab" aria-selected="true" aria-controls="study-panel-shadowing" data-study-tab="shadowing" data-i18n="shadowing">Shadowing</button><button type="button" id="study-tab-pronunciation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-pronunciation" data-study-tab="pronunciation" data-i18n="pronunciation">Pronunciation</button><button type="button" id="study-tab-dictation" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-dictation" data-study-tab="dictation" data-i18n="dictation">Dictation</button><button type="button" id="study-tab-summary" class="study-mode-tab" role="tab" aria-selected="false" aria-controls="study-panel-summary" data-study-tab="summary" data-i18n="summary_tab">Summary</button></div><div id="study-panel-shadowing" class="study-tab-panel" role="tabpanel" aria-labelledby="study-tab-shadowing" data-study-panel="shadowing"><div class="study-player-grid"><div class="study-video-column"><section class="lesson-video" aria-label="Lesson video">${videoBlock}${subtitleCard}</section></div><aside class="transcript-panel" aria-label="Transcript"><div class="transcript-panel-header"><h2 data-i18n="transcript">Transcript</h2><span>${meta.hsk}</span></div><ol${transcriptListAttrs}>${transcriptLines}</ol></aside></div></div><div id="study-panel-pronunciation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-pronunciation" data-study-panel="pronunciation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-dictation" class="study-tab-panel study-placeholder-panel" role="tabpanel" aria-labelledby="study-tab-dictation" data-study-panel="dictation" hidden><p data-i18n="coming_soon">Coming soon</p></div><div id="study-panel-summary" class="study-tab-panel study-summary-panel" role="tabpanel" aria-labelledby="study-tab-summary" data-study-panel="summary" hidden><section id="lesson-summary-tab" aria-label="${SECTION_LABELS.video_description}"><h2 data-i18n="about_lesson">${SECTION_LABELS.video_description}</h2>${summaryBody}</section></div></section>`;
 }
 
-function toHtmlSections(md) {
-  const sections = parseSections(md);
-  const fixedSections = STUDY_SECTIONS.map((key) => `<section id="content-${key}" class="card lesson-section lesson-page-block" data-section="${key}"><h2 data-i18n="${key}">${SECTION_LABELS[key]}</h2>${renderSectionBody(sections[key] || '<p class="missing">(Content missing)</p>')}</section>`).join('');
-  const translationSelector = `<section id="content-translation" class="card lesson-section lesson-page-block translation-controls"><h2 data-i18n="display_translation">Lesson Translation</h2><div class="translation-switch" role="radiogroup" aria-label="Display translation language"><label><input type="radio" name="translation" value="english"> English</label><label><input type="radio" name="translation" value="vietnamese"> Vietnamese</label><label><input type="radio" name="translation" value="none" data-i18n-radio-none="true"> No Translation</label></div></section>`;
-  const translationSections = ['english', 'vietnamese'].map((key) => `<section class="card lesson-section lesson-page-block translation-section" data-translation="${key}"><h2 data-i18n="translation">${SECTION_LABELS[key]}</h2>${renderSectionBody(sections[key] || '<p class="missing">(Content missing)</p>')}</section>`).join('');
-  const contentTabs = `<nav class="content-tabs" aria-label="Lesson content tabs"><a class="content-tab is-active" href="#content-chinese" data-i18n="transcript">Transcript</a><a class="content-tab" href="#content-translation" data-i18n="translation">Translation</a><a class="content-tab" href="#content-vocabulary" data-i18n="vocabulary">Vocabulary</a><a class="content-tab" href="#content-grammar_notes" data-i18n="grammar_notes">Grammar Notes</a></nav>`;
-  return `<div class="lesson-shell lesson-content-flow">${contentTabs}${fixedSections}${translationSelector}${translationSections}</div>`;
+function renderLessonChrome({ lessonSeoHeader, studyPlayer }) {
+  return `<div class="lesson-shell lesson-content-flow lesson-top-flow">${lessonSeoHeader}${studyPlayer}</div>`;
 }
 
 function validateLesson(meta, body, fileName) { for (const key of REQUIRED_FRONTMATTER) if (!meta[key]) throw new Error(`${fileName}: thiếu frontmatter "${key}".`); const sections = parseSections(body); for (const key of REQUIRED_SECTIONS) if (!sections[key]) throw new Error(`${fileName}: thiếu section "## ${key}".`); }
@@ -412,8 +406,8 @@ function build() {
     const youtubeEmbed = toYouTubeEmbedUrl(meta.youtube, { enableJsApi: hasSubtitleTimeline });
     const studyPlayer = renderStudyPlayer({ meta, sections, youtubeEmbed, hasSubtitleTimeline });
     const lessonSeoHeader = `<div class="lesson-seo-heading"><h1>${meta.title}</h1><p>${meta.hsk}</p></div>`;
-    const top = `<div class="lesson-shell lesson-content-flow lesson-top-flow">${lessonSeoHeader}${studyPlayer}</div>`;
-    fs.writeFileSync(path.join(pageDir, 'index.html'), renderPage(meta.title, top + toHtmlSections(body) + baseScript(true), { assetPath: `${SITE_BASE}/`, homePath: SITE_BASE }), 'utf8');
+    const lessonChrome = renderLessonChrome({ lessonSeoHeader, studyPlayer });
+    fs.writeFileSync(path.join(pageDir, 'index.html'), renderPage(meta.title, lessonChrome + baseScript(true), { assetPath: `${SITE_BASE}/`, homePath: SITE_BASE }), 'utf8');
     lessons.push({ ...meta, url: `${SITE_BASE}/lessons/${meta.slug}/` });
   }
 
