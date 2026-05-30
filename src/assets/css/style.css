@@ -304,7 +304,9 @@ ul { padding-left: 1.2rem; margin: 0; }
   gap: 0.24rem;
   cursor: default;
 }
-.learning-language-flag { display: block; font-size: 1.8rem; line-height: 1; text-transform: none; }
+.learning-language-flag { display: grid; place-items: center; line-height: 1; text-transform: none; }
+.language-flag-img { display: block; width: 2rem; height: 2rem; border-radius: 0.42rem; object-fit: cover; box-shadow: 0 2px 6px rgba(79, 63, 53, 0.14); }
+.language-flag-fallback { color: var(--brown); font-size: 0.82rem; letter-spacing: 0.08em; line-height: 1; }
 .learning-language-code { display: block; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; line-height: 1; }
 .learning-language.active { border-color: #8fba99; background: #e7f4ed; box-shadow: inset 0 0 0 1px rgba(109, 148, 120, 0.2), 0 8px 18px rgba(109, 148, 120, 0.12); }
 .learning-language.disabled { color: #948377; opacity: 0.64; cursor: not-allowed; }
@@ -335,7 +337,8 @@ ul { padding-left: 1.2rem; margin: 0; }
   display: grid;
   place-items: center;
 }
-.lesson-sidebar.is-collapsed .learning-language-flag { font-size: 1.35rem; }
+.lesson-sidebar.is-collapsed .language-flag-img { width: 1.75rem; height: 1.75rem; border-radius: 0.38rem; }
+.lesson-sidebar.is-collapsed .language-flag-fallback,
 .lesson-sidebar.is-collapsed .learning-language-code { display: none; }
 .lesson-sidebar.is-collapsed .sidebar-nav { place-items: center; padding-top: 0.75rem; }
 .lesson-sidebar.is-collapsed .sidebar-nav-item { justify-content: center; width: 2.75rem; min-height: 2.75rem; padding: 0; }
