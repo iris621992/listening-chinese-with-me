@@ -288,27 +288,31 @@ ul { padding-left: 1.2rem; margin: 0; }
 .streak-days { display: grid; grid-template-columns: repeat(7, minmax(1.52rem, 1fr)); gap: 0.28rem; }
 .streak-day { display: grid; place-items: center; min-height: 1.65rem; border: 1px solid var(--line); border-radius: 999px; background: #fff8f1; color: var(--muted); font-size: 0.68rem; font-weight: 900; }
 .streak-day.active { background: #6d9478; border-color: #6d9478; color: #fff; box-shadow: 0 7px 14px rgba(109, 148, 120, 0.2); }
-.learning-language-list { display: grid; grid-template-columns: 1fr; gap: 0.38rem; }
+.learning-language-list { display: grid; grid-template-columns: max-content; justify-content: center; gap: 0.38rem; }
 .learning-language {
   position: relative;
+  display: inline-flex;
   justify-content: center;
-  min-height: 3.25rem;
-  padding: 0.5rem 0.72rem;
+  align-items: center;
+  width: fit-content;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 6px 8px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   background: #fff8f1;
   color: var(--brown);
   font-weight: 900;
   text-align: center;
   flex-direction: column;
-  gap: 0.24rem;
+  gap: 0.22rem;
   cursor: default;
 }
 .learning-language-flag { display: grid; place-items: center; line-height: 1; text-transform: none; }
-.language-flag-img { display: block; width: 2rem; height: 2rem; border-radius: 0.42rem; object-fit: cover; box-shadow: 0 2px 6px rgba(79, 63, 53, 0.14); }
-.language-flag-fallback { color: var(--brown); font-size: 0.82rem; letter-spacing: 0.08em; line-height: 1; }
-.learning-language-code { display: block; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; line-height: 1; }
-.learning-language.active { border-color: #8fba99; background: #e7f4ed; box-shadow: inset 0 0 0 1px rgba(109, 148, 120, 0.2), 0 8px 18px rgba(109, 148, 120, 0.12); }
+.language-flag-img { display: block; width: 42px; height: 28px; border-radius: 6px; object-fit: cover; box-shadow: 0 2px 6px rgba(79, 63, 53, 0.14); }
+.language-flag-fallback { color: var(--brown); font-size: 0.75rem; letter-spacing: 0.08em; line-height: 1; }
+.learning-language-code { display: block; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; line-height: 1; }
+.learning-language.active { border-color: #8fba99; background: rgba(231, 244, 237, 0.92); box-shadow: inset 0 0 0 1px rgba(109, 148, 120, 0.16), 0 6px 14px rgba(109, 148, 120, 0.1); }
 .learning-language.disabled { color: #948377; opacity: 0.64; cursor: not-allowed; }
 .learning-language .soon-badge { position: absolute; right: 0.2rem; bottom: -0.35rem; margin: 0; padding-inline: 0.34rem; font-size: 0.56rem; }
 .sidebar-nav { display: grid; gap: 0.42rem; padding-top: 0.75rem; border-top: 1px solid rgba(232, 215, 198, 0.7); }
@@ -316,7 +320,7 @@ ul { padding-left: 1.2rem; margin: 0; }
 .sidebar-nav-item:hover { background: #f3eadf; }
 .sidebar-nav-item.disabled { color: #948377; opacity: 0.68; cursor: not-allowed; }
 .sidebar-nav-item .soon-badge { margin-left: auto; }
-.lesson-sidebar.is-collapsed { overflow: visible; }
+.lesson-sidebar.is-collapsed { overflow: visible; padding-inline: 0.35rem; }
 .lesson-sidebar.is-collapsed .lesson-sidebar-header { justify-content: center; }
 .lesson-sidebar.is-collapsed .lesson-sidebar-brand,
 .lesson-sidebar.is-collapsed .learning-language:not(.active),
@@ -328,16 +332,16 @@ ul { padding-left: 1.2rem; margin: 0; }
 .lesson-sidebar.is-collapsed .streak-days { grid-template-columns: 1fr; width: 2.75rem; }
 .lesson-sidebar.is-collapsed .streak-day { display: none; min-height: 2.1rem; padding-inline: 0.2rem; }
 .lesson-sidebar.is-collapsed .streak-day.is-today { display: grid; }
-.lesson-sidebar.is-collapsed .learning-language-list { grid-template-columns: 1fr; width: 2.75rem; }
+.lesson-sidebar.is-collapsed .learning-language-list { grid-template-columns: max-content; width: auto; justify-content: center; }
 .lesson-sidebar.is-collapsed .learning-language.active {
-  width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0;
-  border-radius: 16px;
-  display: grid;
+  width: fit-content;
+  min-height: 0;
+  padding: 5px 6px;
+  border-radius: 12px;
+  display: inline-flex;
   place-items: center;
 }
-.lesson-sidebar.is-collapsed .language-flag-img { width: 1.75rem; height: 1.75rem; border-radius: 0.38rem; }
+.lesson-sidebar.is-collapsed .language-flag-img { width: 42px; height: 28px; border-radius: 6px; }
 .lesson-sidebar.is-collapsed .language-flag-fallback,
 .lesson-sidebar.is-collapsed .learning-language-code { display: none; }
 .lesson-sidebar.is-collapsed .sidebar-nav { place-items: center; padding-top: 0.75rem; }
