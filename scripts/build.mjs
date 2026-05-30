@@ -22,11 +22,7 @@ const SECTION_LABELS = {
 };
 
 const LEARNING_LANGUAGE_CHANNELS = [
-  { id: 'chinese', code: 'ZH', flag: '🇨🇳', labelKey: 'chinese' },
-  { id: 'vietnamese', code: 'VI', flag: '🇻🇳', labelKey: 'vietnamese_language' },
-  { id: 'korean', code: 'KO', flag: '🇰🇷', labelKey: 'korean_language' },
-  { id: 'japanese', code: 'JA', flag: '🇯🇵', labelKey: 'japanese_language' },
-  { id: 'english', code: 'EN', flag: '🇺🇸', labelKey: 'english_language' }
+  { id: 'chinese', code: 'ZH', flag: '🇨🇳', labelKey: 'chinese' }
 ];
 const UI_TEXT = {
   en: {
