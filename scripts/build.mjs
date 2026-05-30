@@ -443,8 +443,9 @@ function renderLearningSidebar({ lessonCounts = {}, activeLanguage = 'chinese' }
   const languageItems = availableLearningLanguages
     .map((language) => {
       const classes = ['learning-language'];
+      const flag = language.flag || '🇨🇳';
       if (language.id === activeLanguage) classes.push('active');
-      return `<span class="${classes.join(' ')}" data-sidebar-expand-on-activate><span class="learning-language-flag" aria-hidden="true">${language.flag}</span><span class="learning-language-code">${language.code}</span><span class="sr-only" data-i18n="${language.labelKey}">${language.code}</span></span>`;
+      return `<span class="${classes.join(' ')}" data-sidebar-expand-on-activate><span class="learning-language-flag" aria-hidden="true">${flag}</span><span class="learning-language-code">${language.code}</span><span class="sr-only" data-i18n="${language.labelKey}">${language.code}</span></span>`;
     })
     .join('');
   const navItems = [
