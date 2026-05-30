@@ -317,12 +317,15 @@ ul { padding-left: 1.2rem; margin: 0; }
 .lesson-sidebar.is-collapsed { overflow: visible; }
 .lesson-sidebar.is-collapsed .lesson-sidebar-header { justify-content: center; }
 .lesson-sidebar.is-collapsed .lesson-sidebar-brand,
-.lesson-sidebar.is-collapsed .sidebar-streak,
 .lesson-sidebar.is-collapsed .learning-language:not(.active),
 .lesson-sidebar.is-collapsed .sidebar-section-title,
 .lesson-sidebar.is-collapsed .lesson-sidebar-text,
 .lesson-sidebar.is-collapsed .soon-badge { display: none; }
+.lesson-sidebar.is-collapsed .sidebar-streak,
 .lesson-sidebar.is-collapsed .sidebar-language { padding-block: 0.75rem; place-items: center; }
+.lesson-sidebar.is-collapsed .streak-days { grid-template-columns: 1fr; width: 2.75rem; }
+.lesson-sidebar.is-collapsed .streak-day { display: none; min-height: 2.1rem; padding-inline: 0.2rem; }
+.lesson-sidebar.is-collapsed .streak-day.is-today { display: grid; }
 .lesson-sidebar.is-collapsed .learning-language-list { grid-template-columns: 1fr; width: 2.75rem; }
 .lesson-sidebar.is-collapsed .learning-language.active {
   width: 2.75rem;
