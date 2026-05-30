@@ -22,7 +22,7 @@ const SECTION_LABELS = {
 };
 
 const LEARNING_LANGUAGE_CHANNELS = [
-  { id: 'chinese', code: 'ZH', flag: '🇨🇳', labelKey: 'chinese' }
+  { id: 'chinese', flag: '🇨🇳', code: 'ZH', enabled: true }
 ];
 const UI_TEXT = {
   en: {
@@ -439,13 +439,13 @@ function renderLearningSidebar({ lessonCounts = {}, activeLanguage = 'chinese' }
   const streakDays = days
     .map(([key, fallback], index) => `<span class="streak-day" data-streak-day="${index}" data-i18n="${key}">${fallback}</span>`)
     .join('');
-  const availableLearningLanguages = LEARNING_LANGUAGE_CHANNELS.filter((language) => (lessonCounts[language.id] || 0) > 0);
+  const availableLearningLanguages = LEARNING_LANGUAGE_CHANNELS.filter((language) => language.enabled && (lessonCounts[language.id] || 0) > 0);
   const languageItems = availableLearningLanguages
     .map((language) => {
       const classes = ['learning-language'];
       const flag = language.flag || '🇨🇳';
       if (language.id === activeLanguage) classes.push('active');
-      return `<span class="${classes.join(' ')}" data-sidebar-expand-on-activate><span class="learning-language-flag" aria-hidden="true">${flag}</span><span class="learning-language-code">${language.code}</span><span class="sr-only" data-i18n="${language.labelKey}">${language.code}</span></span>`;
+      return `<span class="${classes.join(' ')}" data-sidebar-expand-on-activate aria-label="${language.id}"><span class="learning-language-flag" aria-hidden="true">${flag}</span><span class="learning-language-code">${language.code}</span></span>`;
     })
     .join('');
   const navItems = [
